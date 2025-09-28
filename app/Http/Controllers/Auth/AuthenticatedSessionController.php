@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -14,7 +15,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create()
     {
         return view('auth.login');
     }
@@ -24,11 +25,25 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        try {
+            $request->authenticate();
+        } catch (ValidationException $e) {
+            $errors = $e->errors();
+            if (isset($errors['redirect'])) {
+                return redirect($errors['redirect'][0]);
+            }
+            throw $e;
+        }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        Auth::user()->load([
+            'currentService.currentAppointment.workPlace.school.office',
+            'currentService.currentAppointment.workPlace.office',
+            'currentService.currentAppointment.workPlace.ministry.office',
+            'currentService.currentAppointment.currentPosition'
+        ]);
+        return redirect()->intended('/dashboard'); // or '/home' or whatever
     }
 
     /**
@@ -37,9 +52,7 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');
