@@ -1,268 +1,117 @@
 <x-app-layout>
-    <div class="py-3">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <x-breadcrumb :list="$option" />
-            <div class="p-1 rounded shadow-md flex justify-end space-x-2">
-                <x-link-icon-button background="bg-red-500" textcolor="text-white" link="sleas.reports" icon="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" text="Reports" />
-                <x-link-icon-button background="bg-green-500" textcolor="text-white" link="sleas.search" icon="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" text="Search" />
-                <x-link-icon-button background="bg-green-500" textcolor="text-white" link="sleas.register" icon="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" text="Create" />
-            </div>
-            <x-profile-heading image="" heading="{{ session('workPlaceName') }}" subHeading="SLEAS Section" />
-            <div class="p-1 px-0 overflow-scroll">
-                <table class="w-full mt-4 text-left table-auto min-w-max">=
-                    <thead>
-                    <tr>
-                        <th class="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                        <p class="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                            Age Gap
-                        </p>
-                        </th>
-                        <th class="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                        <p class="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                            Male SLEAS
-                        </p>
-                        </th>
-                        <th class="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                        <p class="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                            Female SLEAS
-                        </p>
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($sleasCounts as $card)
-                            <tr>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="relative inline-block h-9 w-9 text-blue-gray-900">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 18H8M6 18V12M10 14H14M12 14V8M16 10H20M18 10V4"
-                                            />
-                                        </svg>
-                                        <div class="flex flex-col">
-                                            <p class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                                                20-30
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->female_20_30 }}
-                                        </p>
-                                    </div>
-                                </td>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-700 dark:text-gray-500 leading-tight">
+            {{ __('Teacher Dashboard') }}
+        </h2>
+    </x-slot>
 
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->male_20_30 }}
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="relative inline-block h-9 w-9 text-blue-gray-900">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 18H8M6 18V12M10 14H14M12 14V8M16 10H20M18 10V4"
-                                            />
-                                        </svg>
-                                        <div class="flex flex-col">
-                                            <p class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                                                30-40
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->female_30_40 }}
-                                        </p>
-                                    </div>
-                                </td>
+    <div class="py-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
+        <div class="mx-auto sm:px-6 lg:px-8">
+            <!-- Content Area -->
+            <main class="flex-1 overflow-y-auto">
+                <div class="mb-6">
+                    <!-- Breadcrumb -->
+                    <x-breadcrumb :items="[
+                        'Home' => route('dashboard'),
+                        'Teacher Dashboard' => null,
+                    ]" />
+                </div>
 
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->male_30_40 }}
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="relative inline-block h-9 w-9 text-blue-gray-900">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 18H8M6 18V12M10 14H14M12 14V8M16 10H20M18 10V4"
-                                            />
-                                        </svg>
-                                        <div class="flex flex-col">
-                                            <p class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                                                40-50
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->female_40_50 }}
-                                        </p>
-                                    </div>
-                                </td>
+                <div class="mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100"></h2>
+                    <p class="text-gray-600 dark:text-gray-300">Manage View SLTS(Sri Lanka Teacher Service)
+                    </p>
+                </div>
 
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->male_40_50 }}
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="relative inline-block h-9 w-9 text-blue-gray-900">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 18H8M6 18V12M10 14H14M12 14V8M16 10H20M18 10V4"
-                                            />
-                                        </svg>
-                                        <div class="flex flex-col">
-                                            <p class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                                                50-55
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->female_50_55 }}
-                                        </p>
-                                    </div>
-                                </td>
+                <div class="mt-8 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-end items-center p-6 gap-2">
+                        <a href="{{ route('teacher.register') }}"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
+                            Register
+                        </a>
+                        <button x-data=""
+                            x-on:click.prevent="$dispatch('open-modal', 'teacher-search')"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
+                            Search
+                        </button>
+                        <x-modal name="teacher-search" :show="$errors->userDeletion->isNotEmpty()" focusable>
+                            <livewire:teacher-search />
+                        </x-modal>
 
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->male_50_55 }}
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="relative inline-block h-9 w-9 text-blue-gray-900">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 18H8M6 18V12M10 14H14M12 14V8M16 10H20M18 10V4"
-                                            />
-                                        </svg>
-                                        <div class="flex flex-col">
-                                            <p class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                                                55-59
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->female_55_59 }}
-                                        </p>
-                                    </div>
-                                </td>
+                        <a href="{{ route('teacher.reportlist') }}"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
+                            Reports
+                        </a>
+                    </div>
+                </div>
 
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->male_55_59 }}
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="relative inline-block h-9 w-9 text-blue-gray-900">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 18H8M6 18V12M10 14H14M12 14V8M16 10H20M18 10V4"
-                                            />
-                                        </svg>
-                                        <div class="flex flex-col">
-                                            <p class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                                                59-60
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->female_59_60 }}
-                                        </p>
-                                    </div>
-                                </td>
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
-                                <td class="p-4 border-b border-blue-gray-50">
-                                    <div class="flex flex-col">
-                                        <p
-                                        class="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900 opacity-70">
-                                        {{ $card->male_59_60 }}
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                    {{-- Appointment ≥ 10 years --}}
+                    <x-dashboard-card
+                    title="Service < 30 Years"
+                    icon="calendar-check"  {{-- indicates current appointment --}}
+                    value="{{ $teacherCounts['service_under_30'] }}"
+                    trend="See"
+                    trendText="List"
+                    trendColor="purple"
+                    />
+
+                    {{-- Service ≥ 30 years --}}
+                    <x-dashboard-card
+                    title="Service ≥ 30 Years"
+                    icon="award"  {{-- indicates long service / achievement --}}
+                    value="{{$teacherCounts['service_over_30'] }}"
+                    trend="See"
+                    trendText="List"
+                    trendColor="red"
+                    />
+
+
+
+                    <x-dashboard-card
+                        title="Male Teachers"
+                        icon="mars"
+                        value="{{ $teacherCounts['male_count'] }}"
+                        trend="See"
+                        trendText="List"
+                        trendColor="blue"
+                    />
+
+
+                    <x-dashboard-card
+                        title="Female Teachers"
+                        icon="venus"
+                        value="{{ $teacherCounts['female_count'] }}"
+                        trend="See"
+                        trendText="List"
+                        trendColor="pink"
+                    />
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <x-chart-card
+                        id="ageChart"
+                        :labels="array_keys($teacherCounts['ageGroups'])"
+                        :data="array_values($teacherCounts['ageGroups'])"
+                        title="Teacher Appointment Periods"
+                        type="bar"
+                        dataset-label="Teachers"
+                    />
+
+                    <x-chart-card
+                        id="provinceChart"
+                        :labels="array_keys($teacherCounts['appointmentPeriods'])"
+                        :data="array_values($teacherCounts['appointmentPeriods'])"
+                        title="Teacher Age Groups"
+                        type="pie"
+                    />
+                </div>
+
+                @stack('scripts') {{-- This renders all the chart scripts --}}
+            </main>
         </div>
     </div>
 </x-app-layout>

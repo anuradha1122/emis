@@ -12,10 +12,16 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique(); // e.g., "approve_transfers"
             $table->string('description')->nullable(); // optional human-readable explanation
+
+            // Foreign key to permission_categories
+            $table->unsignedBigInteger('categoryId');
+            $table->foreign('categoryId')->references('id')->on('permission_categories')->onDelete('cascade');
+
             $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
+
 
     public function down(): void
     {

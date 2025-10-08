@@ -26,77 +26,36 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
                     <x-dashboard-card
-                        title="Races"
+                        title="Roles"
                         icon="school"
-                        value="4"
-                        trend="change"
-                        trendText="Races"
+                        value="{{ $settingsCount['role_count'] }}"
+                        trend="Change"
+                        trendText="View Details"
                         trendColor="green"
+                        :trendLink="route('settings.roles.list')"
                     />
 
+
                     <x-dashboard-card
-                        title="Religions"
-                        icon="users"
-                        value="5"
+                        title="Permissions"
+                        icon="lock"
+                        value="{{ $settingsCount['permission_count'] }}"
                         trend="change"
-                        trendText="Religions"
+                        trendText="Permissions"
                         trendColor="blue"
+                        :trendLink="route('settings.permissionlist')"
                     />
 
                     <x-dashboard-card
-                        title="Civil Status"
-                        icon="user-check"
-                        value="5"
+                        title="User Roles"
+                        icon="lock"
+                        value="{{ $settingsCount['role_user_count'] }}"
                         trend="change"
-                        trendText="Civil Status"
-                        trendColor="yellow"
+                        trendText="User Roles"
+                        trendColor="red"
+                        :trendLink="route('settings.rolepermission')"
                     />
 
-                    <x-dashboard-card
-                        title="Mediums"
-                        icon="globe"
-                        value="3"
-                        trend="change"
-                        trendText="Mediums"
-                        trendColor="purple"
-                    />
-
-                </div>
-
-                <!-- Recent Orders Table -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
-                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100">Permission List</h3>
-                        <a href="{{ route('settings.permissionlist') }}" class="px-4 py-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg hover:bg-primary-600 dark:hover:bg-primary-700 text-sm">
-                            View All
-                        </a>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="bg-gray-50 dark:bg-gray-700">
-                                    <th
-                                        class="py-3 px-4 text-left text-sm font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        ID</th>
-                                    <th
-                                        class="py-3 px-4 text-left text-sm font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Permission</th>
-                                    <th
-                                        class="py-3 px-4 text-left text-sm font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($permissions as $permission)
-                                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">{{ $permission->id }}</td>
-                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">{{ $permission->name }}</td>
-                                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300">{{ $permission->description }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </main>
         </div>

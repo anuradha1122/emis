@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\UserInService;
 use App\Models\Position;
 use App\Models\PersonalInfo;
+use App\Models\School;
 
 class User extends Authenticatable
 {
@@ -60,12 +61,20 @@ class User extends Authenticatable
      * The *current* teacher service for this user (serviceId = 1 and releasedDate is null).
      * Use ->currentTeacherService to get the model or use relation for queries/eager loading.
      */
-    public function currentTeacherService(): HasOne
-    {
-        return $this->hasOne(UserInService::class, 'userId', 'id')
-            ->where('serviceId', 1)   // teacher service only
-            ->whereNull('releasedDate');
-    }
+    public function currentPrincipalService(): HasOne
+{
+    return $this->hasOne(UserInService::class, 'userId', 'id')
+                ->where('serviceId', 3)
+                ->whereNull('releasedDate');
+}
+
+public function currentTeacherService(): HasOne
+{
+    return $this->hasOne(UserInService::class, 'userId', 'id')
+                ->where('serviceId', 1)
+                ->whereNull('releasedDate');
+}
+
 
 
     /**
@@ -85,6 +94,30 @@ class User extends Authenticatable
     {
         return $this->hasOne(LocationInfo::class, 'userId', 'id');
     }
+
+    public function educationQualificationInfos()
+    {
+        return $this->hasMany(EducationQualificationInfo::class, 'userId')
+                    ->where('active', 1)
+                    ->with('educationQualification');
+    }
+
+    public function professionalQualificationInfos()
+    {
+        return $this->hasMany(ProfessionalQualificationInfo::class, 'userId')
+                    ->where('active', 1)
+                    ->with('professionalQualification');
+    }
+
+    public function familyInfos()
+    {
+        return $this->hasMany(FamilyInfo::class, 'userId')
+                    ->where('active', 1)
+                    ->with('memberTypeRelation');
+    }
+
+
+
 
     public function workPlaceType()
     {
@@ -139,42 +172,61 @@ class User extends Authenticatable
                     ->flatMap(fn($division) => $division->schools)
                     ->pluck('id')
                     ->toArray();
-
+            case 'ministry':
+                return School::where('active', 1)->pluck('id')->toArray();
             default:
                 return [];
         }
     }
 
     // === Permission Management ===
-    public function permissions()
+    // Relation to Role
+    public function role()
     {
-        $positionId = $this->currentService?->currentAppointment?->currentPosition?->positionId;
-        if (!$positionId) return collect();
-        return Position::find($positionId)?->permissions ?? collect();
+        return $this->belongsTo(Role::class, 'roleId'); // assuming 'role_id' is in users table
     }
 
-    public function hasPermission($permissionName)
+    // Permissions via role
+    public function permissions()
     {
-        return $this->permissions()->contains('name', $permissionName);
+        return $this->role
+        ? $this->role->permissions()->where('active', 1)
+        : collect();
+    }
+
+    // Check if user has a specific permission
+    public function hasPermission(string $permissionName): bool
+    {
+        return $this->permissions()->where('name', $permissionName)->exists();
+    }
+
+    // Optional: Check if user has permission by ID
+    public function hasPermissionById(int $permissionId): bool
+    {
+        return $this->permissions()->where('id', $permissionId)->exists();
     }
 
     // === User Search ===
-    public function scopeSearchUsers(Builder $query, $search = null, int $type = 1)
+    public function scopeSearchUsers(Builder $query, $search = null, int $appointmentType = 1, ?int $serviceId = null)
     {
-        return $query->with(['personalInfo', 'currentTeacherService.currentAppointment'])
-            ->whereHas('currentTeacherService', function ($q) use ($type) {
-                $q->whereHas('currentAppointment', function ($q2) use ($type) {
-                    $q2->where('appointmentType', $type);
-                });
-            })
-            ->when($search, function ($q) use ($search) {
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('nic', 'LIKE', "%{$search}%")
-                        ->orWhere('nameWithInitials', 'LIKE', "%{$search}%");
-                });
+        return $query->with(['personalInfo', 'currentService'])
+        ->whereHas('currentService', function ($q) use ($serviceId) {
+            if ($serviceId !== null) {
+                $q->where('serviceId', $serviceId);
+            }
+            $q->whereNull('releasedDate'); // only current service
+        })
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('nic', 'LIKE', "%{$search}%")
+                    ->orWhere('nameWithInitials', 'LIKE', "%{$search}%");
             });
+        });
+
     }
+
+
 
 
 }

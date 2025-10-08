@@ -8,11 +8,21 @@ use App\Http\Requests\UpdatePrincipalTransferRequest;
 use App\Models\PrincipalTransfer;
 use App\Models\UserServiceAppointment;
 use App\Models\User;
+use App\Models\School;
+use App\Models\Office;
+use App\Models\SchoolAuthority;
+use App\Models\SchoolClass;
+use App\Models\SchoolDensity;
+use App\Models\SchoolEthnicity;
+use App\Models\SchoolFacility;
+use App\Models\SchoolGender;
+use App\Models\SchoolLanguage;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
+use Mpdf\Mpdf;
 
 class PrincipalTransferController extends Controller
 {
@@ -73,6 +83,405 @@ class PrincipalTransferController extends Controller
         ];
         return view('principal/transferform',compact('option','positionList','binaryList','zoneSchools'));
     }
+
+    public function transferreport()
+    {
+        return view('principal.transfer-report');
+    }
+
+
+
+    public function transferreportPDF()
+    {
+        $schoolAuthorityList = SchoolAuthority::select('id','name')->get();
+        $schoolEthnicityList = SchoolEthnicity::select('id','name')->get();
+        $schoolClassList = SchoolClass::select('id','name')->get();
+        $schoolDensityList = SchoolDensity::select('id','name')->get();
+        $schoolFacilityList = SchoolFacility::select('id','name')->get();
+        $schoolGenderList = SchoolGender::select('id','name')->get();
+        $schoolLanguageList = SchoolLanguage::select('id','name')->get();
+
+        return view('principal.transfer-report-pdf',compact('schoolAuthorityList', 'schoolEthnicityList', 'schoolClassList', 'schoolDensityList', 'schoolFacilityList', 'schoolGenderList', 'schoolLanguageList'));
+    }
+
+    // public function exporttransferreportPDF(Request $request)
+    // {
+    //     $mpdf = new Mpdf([
+    //         'default_font' => 'dejavusans', // Sinhala/Tamil friendly
+    //     ]);
+
+    //     $chunkSize = 100; // adjust if needed
+    //     $query = YourModel::query(); // replace with your query
+
+    //     $query->chunk($chunkSize, function ($results) use ($mpdf) {
+    //         $html = view('exports.pdf.principal.transfer-full-report', compact('results'))->render();
+    //         $mpdf->WriteHTML($html);
+    //         $mpdf->AddPage();
+    //     });
+
+    //     return response($mpdf->Output('', 'S'))
+    //         ->header('Content-Type', 'application/pdf')
+    //         ->header('Content-Disposition', 'inline; filename="transfer-report.pdf"');
+
+    //     $query = User::query()
+    //         ->with([
+    //             'personalInfo.race',
+    //             'personalInfo.religion',
+    //             'personalInfo.civilStatus',
+    //             'currentPrincipalService.currentAppointment.workPlace.school',
+    //         ])
+    //         ->whereHas('currentPrincipalService');
+
+    //     // 🏫 Location-based filters (same as before)
+    //     if ($request->filled('school')) {
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->where('id', $request->school));
+    //     } elseif ($request->filled('division')) {
+    //         $division = Office::with('schools')->find($request->division);
+    //         $schoolIds = $division?->schools->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     } elseif ($request->filled('zone')) {
+    //         $zone = Office::with('subOffices.schools')->find($request->zone);
+    //         $schoolIds = $zone?->subOffices->flatMap(fn($d) => $d->schools)->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     } elseif ($request->filled('district')) {
+    //         $district = District::with('zones.subOffices.schools')->find($request->district);
+    //         $schoolIds = $district?->zones
+    //             ->flatMap(fn($zone) => $zone->subOffices
+    //                 ->flatMap(fn($d) => $d->schools))
+    //             ->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     } elseif ($request->filled('province')) {
+    //         $province = Province::with('districts.zones.subOffices.schools')->find($request->province);
+    //         $schoolIds = $province?->districts
+    //             ->flatMap(fn($district) => $district->zones
+    //                 ->flatMap(fn($zone) => $zone->subOffices
+    //                     ->flatMap(fn($d) => $d->schools)))
+    //             ->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     }
+
+    //     // 🏫 School attributes
+    //     foreach ([
+    //         'schoolAuthority' => 'authorityId',
+    //         'schoolEthnicity' => 'ethnicityId',
+    //         'schoolClass' => 'classId',
+    //         'schoolDensity' => 'densityId',
+    //         'schoolFacility' => 'facilityId',
+    //         'schoolGender' => 'genderId',
+    //         'schoolLanguage' => 'languageId',
+    //     ] as $property => $column) {
+    //         if ($request->filled($property)) {
+    //             $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //                 fn($q) => $q->where($column, $request->$property));
+    //         }
+    //     }
+
+    //     // 👤 Personal Info filters
+    //     if ($request->filled('race')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('raceId', $request->race));
+    //     }
+    //     if ($request->filled('religion')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('religionId', $request->religion));
+    //     }
+    //     if ($request->filled('civilStatus')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('civilStatusId', $request->civilStatus));
+    //     }
+    //     if ($request->filled('gender')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('genderId', $request->gender));
+    //     }
+    //     if ($request->filled('birthDayStart')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('birthDay', '>=', $request->birthDayStart));
+    //     }
+    //     if ($request->filled('birthDayEnd')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('birthDay', '<=', $request->birthDayEnd));
+    //     }
+
+    //     // 📅 Service filters
+    //     if ($request->filled('serviceStart')) {
+    //         $query->whereHas('currentPrincipalService', fn($q) => $q->where('appointedDate', '>=', $request->serviceStart));
+    //     }
+    //     if ($request->filled('serviceEnd')) {
+    //         $query->whereHas('currentPrincipalService', fn($q) => $q->where('appointedDate', '<=', $request->serviceEnd));
+    //     }
+    //     if ($request->filled('schoolAppointStart')) {
+    //         $query->whereHas('currentPrincipalService.currentAppointment',
+    //             fn($q) => $q->where('appointedDate', '>=', $request->schoolAppointStart));
+    //     }
+    //     if ($request->filled('schoolAppointEnd')) {
+    //         $query->whereHas('currentPrincipalService.currentAppointment',
+    //             fn($q) => $q->where('appointedDate', '<=', $request->schoolAppointEnd));
+    //     }
+
+    //     // 🔹 Collect results & map like PrincipalTransfer
+    //     $results = $query->get()->map(function ($user) {
+    //         $personalInfo = $user->personalInfo;
+    //         $service = $user->currentPrincipalService;
+    //         $school = $service?->currentAppointment?->workPlace?->school;
+
+    //         return [
+    //             'NIC' => $user->nic ?? '',
+    //             'Principal Name' => $user->nameWithInitials ?? '',
+    //             'School' => $school?->name ?? '',
+    //             'Gender' => $personalInfo?->genderId == 1 ? 'Male'
+    //                         : ($personalInfo?->genderId == 2 ? 'Female' : 'N/A'),
+    //             'Race' => $personalInfo?->race?->name ?? '',
+    //             'Religion' => $personalInfo?->religion?->name ?? '',
+    //             'Civil Status' => $personalInfo?->civilStatus?->name ?? '',
+    //             'Birth Day' => $personalInfo?->birthDay ?? '',
+    //             'Service Appointed Date' => $service?->appointedDate ?? '',
+    //             'School Appointed Date' => $service?->currentAppointment?->appointedDate ?? '',
+    //             // add more fields like in your PrincipalTransfer map if needed
+    //         ];
+
+    //     });
+    //     // 🔹 Generate PDF
+    //     $mpdf = new \Mpdf\Mpdf([
+    //         'format' => 'A4-P',
+    //         'margin_top' => 15,
+    //         'margin_bottom' => 15,
+    //         'margin_left' => 10,
+    //         'margin_right' => 10,
+    //     ]);
+
+    //     $html = view('exports.pdf.principal.full-report', ['results' => $results])->render();
+    //     $mpdf->WriteHTML($html);
+
+    //     return response($mpdf->Output('principal_full_report.pdf', \Mpdf\Output\Destination::DOWNLOAD));
+    // }
+
+    public function exporttransferreportPDF(Request $request)
+    {
+        ini_set('memory_limit', '512M'); // increase to 512MB
+        set_time_limit(300); //
+        // 🔹 Base query on PrincipalTransfer with all relations
+        $query = PrincipalTransfer::with([
+            'userService.user.personalInfo.race',
+            'userService.user.personalInfo.religion',
+            'userService.user.personalInfo.civilStatus',
+            'userService.currentAppointment.workPlace.school',
+            'school1.workPlace',
+            'school2.workPlace',
+            'school3.workPlace',
+            'school4.workPlace',
+            'school5.workPlace',
+        ])
+        ->where('active', 1); // only active transfers
+
+        // 🔹 Location filters
+        if ($request->filled('school')) {
+            $query->whereHas('userService.currentAppointment.workPlace.school', fn($q) =>
+                $q->where('id', $request->school)
+            );
+        } elseif ($request->filled('division')) {
+            $division = Office::with('schools')->find($request->division);
+            $schoolIds = $division?->schools->pluck('id')->toArray() ?? [];
+            $query->whereHas('userService.currentAppointment.workPlace.school', fn($q) =>
+                $q->whereIn('id', $schoolIds)
+            );
+        } elseif ($request->filled('zone')) {
+            $zone = Office::with('subOffices.schools')->find($request->zone);
+            $schoolIds = $zone?->subOffices->flatMap(fn($d) => $d->schools)->pluck('id')->toArray() ?? [];
+            $query->whereHas('userService.currentAppointment.workPlace.school', fn($q) =>
+                $q->whereIn('id', $schoolIds)
+            );
+        } elseif ($request->filled('district')) {
+            $district = District::with('zones.subOffices.schools')->find($request->district);
+            $schoolIds = $district?->zones
+                ->flatMap(fn($zone) => $zone->subOffices
+                    ->flatMap(fn($d) => $d->schools))
+                ->pluck('id')->toArray() ?? [];
+            $query->whereHas('userService.currentAppointment.workPlace.school', fn($q) =>
+                $q->whereIn('id', $schoolIds)
+            );
+        } elseif ($request->filled('province')) {
+            $province = Province::with('districts.zones.subOffices.schools')->find($request->province);
+            $schoolIds = $province?->districts
+                ->flatMap(fn($district) => $district->zones
+                    ->flatMap(fn($zone) => $zone->subOffices
+                        ->flatMap(fn($d) => $d->schools)))
+                ->pluck('id')->toArray() ?? [];
+            $query->whereHas('userService.currentAppointment.workPlace.school', fn($q) =>
+                $q->whereIn('id', $schoolIds)
+            );
+        }
+
+        // 🔹 Personal Info filters
+        if ($request->filled('gender')) {
+            $query->whereHas('userService.user.personalInfo', fn($q) => $q->where('genderId', $request->gender));
+        }
+        if ($request->filled('race')) {
+            $query->whereHas('userService.user.personalInfo', fn($q) => $q->where('raceId', $request->race));
+        }
+        if ($request->filled('religion')) {
+            $query->whereHas('userService.user.personalInfo', fn($q) => $q->where('religionId', $request->religion));
+        }
+        if ($request->filled('civilStatus')) {
+            $query->whereHas('userService.user.personalInfo', fn($q) => $q->where('civilStatusId', $request->civilStatus));
+        }
+
+        // 🔹 Service filters
+        if ($request->filled('serviceStart')) {
+            $query->whereHas('userService', fn($q) => $q->where('appointedDate', '>=', $request->serviceStart));
+        }
+        if ($request->filled('serviceEnd')) {
+            $query->whereHas('userService', fn($q) => $q->where('appointedDate', '<=', $request->serviceEnd));
+        }
+        if ($request->filled('schoolAppointStart')) {
+            $query->whereHas('userService.currentAppointment', fn($q) => $q->where('appointedDate', '>=', $request->schoolAppointStart));
+        }
+        if ($request->filled('schoolAppointEnd')) {
+            $query->whereHas('userService.currentAppointment', fn($q) => $q->where('appointedDate', '<=', $request->schoolAppointEnd));
+        }
+
+        // 🔹 Prepare mPDF
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A4-P',
+            'margin_top' => 15,
+            'margin_bottom' => 15,
+            'margin_left' => 10,
+            'margin_right' => 10,
+        ]);
+
+        $chunkSize = 2; // 2 records per page
+
+        $query->chunk($chunkSize, function ($transfers) use ($mpdf) {
+            // Pass all 2 records in this chunk to the Blade
+            $html = view('exports.pdf.principal.transfer-full-report', ['results' => $transfers])->render();
+
+            $mpdf->WriteHTML($html);
+
+            // Only add a page after each chunk, not after every single record
+            $mpdf->AddPage();
+        });
+
+        return response($mpdf->Output('principal_full_report.pdf', \Mpdf\Output\Destination::DOWNLOAD));
+
+    }
+
+
+
+    // public function exporttransferreportPDF(Request $request)
+    // {
+    //     $query = User::query()
+    //         ->with([
+    //             'personalInfo',
+    //             'currentPrincipalService.currentAppointment.workPlace.school'
+    //         ])
+    //         ->whereHas('currentPrincipalService');
+
+    //     // 🏫 Location-based filters
+    //     if ($request->filled('school')) {
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->where('id', $request->school));
+    //     } elseif ($request->filled('division')) {
+    //         $division = Office::with('schools')->find($request->division);
+    //         $schoolIds = $division?->schools->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     } elseif ($request->filled('zone')) {
+    //         $zone = Office::with('subOffices.schools')->find($request->zone);
+    //         $schoolIds = $zone?->subOffices->flatMap(fn($d) => $d->schools)->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     } elseif ($request->filled('district')) {
+    //         $district = District::with('zones.subOffices.schools')->find($request->district);
+    //         $schoolIds = $district?->zones
+    //             ->flatMap(fn($zone) => $zone->subOffices
+    //                 ->flatMap(fn($d) => $d->schools))
+    //             ->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     } elseif ($request->filled('province')) {
+    //         $province = Province::with('districts.zones.subOffices.schools')->find($request->province);
+    //         $schoolIds = $province?->districts
+    //             ->flatMap(fn($district) => $district->zones
+    //                 ->flatMap(fn($zone) => $zone->subOffices
+    //                     ->flatMap(fn($d) => $d->schools)))
+    //             ->pluck('id')->toArray() ?? [];
+    //         $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //             fn($q) => $q->whereIn('id', $schoolIds));
+    //     }
+
+    //     // 🏫 School attributes
+    //     foreach ([
+    //         'schoolAuthority' => 'authorityId',
+    //         'schoolEthnicity' => 'ethnicityId',
+    //         'schoolClass' => 'classId',
+    //         'schoolDensity' => 'densityId',
+    //         'schoolFacility' => 'facilityId',
+    //         'schoolGender' => 'genderId',
+    //         'schoolLanguage' => 'languageId',
+    //     ] as $property => $column) {
+    //         if ($request->filled($property)) {
+    //             $query->whereHas('currentPrincipalService.currentAppointment.workPlace.school',
+    //                 fn($q) => $q->where($column, $request->$property));
+    //         }
+    //     }
+
+    //     // 👤 Personal Info filters
+    //     if ($request->filled('race')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('raceId', $request->race));
+    //     }
+    //     if ($request->filled('religion')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('religionId', $request->religion));
+    //     }
+    //     if ($request->filled('civilStatus')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('civilStatusId', $request->civilStatus));
+    //     }
+    //     if ($request->filled('gender')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('genderId', $request->gender));
+    //     }
+    //     if ($request->filled('birthDayStart')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('birthDay', '>=', $request->birthDayStart));
+    //     }
+    //     if ($request->filled('birthDayEnd')) {
+    //         $query->whereHas('personalInfo', fn($q) => $q->where('birthDay', '<=', $request->birthDayEnd));
+    //     }
+
+    //     // 📅 Service filters
+    //     if ($request->filled('serviceStart')) {
+    //         $query->whereHas('currentPrincipalService', fn($q) => $q->where('appointedDate', '>=', $request->serviceStart));
+    //     }
+    //     if ($request->filled('serviceEnd')) {
+    //         $query->whereHas('currentPrincipalService', fn($q) => $q->where('appointedDate', '<=', $request->serviceEnd));
+    //     }
+    //     if ($request->filled('schoolAppointStart')) {
+    //         $query->whereHas('currentPrincipalService.currentAppointment',
+    //             fn($q) => $q->where('appointedDate', '>=', $request->schoolAppointStart));
+    //     }
+    //     if ($request->filled('schoolAppointEnd')) {
+    //         $query->whereHas('currentPrincipalService.currentAppointment',
+    //             fn($q) => $q->where('appointedDate', '<=', $request->schoolAppointEnd));
+    //     }
+
+    //     // 🔹 Chunked query to prevent memory issues
+
+
+    //     // 🔹 Generate PDF with mPDF
+    //     $mpdf = new Mpdf([
+    //         'format' => 'A4-P', // landscape
+    //         'margin_top' => 15,
+    //         'margin_bottom' => 15,
+    //         'margin_left' => 10,
+    //         'margin_right' => 10,
+    //     ]);
+
+    //     // 🔹 Chunked query to prevent memory & backtrack issues
+    //     $chunkSize = 100; // adjust if needed
+
+    //     $query->chunk($chunkSize, function($results) use ($mpdf) {
+    //         $html = view('exports.pdf.principal.transfer-full-report', compact('results'))->render();
+    //         $mpdf->WriteHTML($html);
+    //         $mpdf->AddPage(); // automatically add page break after each chunk
+    //     });
+
+    //     return response($mpdf->Output('principal_transfer_full_report.pdf', \Mpdf\Output\Destination::DOWNLOAD));
+    // }
 
     /**
      * Show the form for creating a new resource.

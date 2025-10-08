@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name', 50);
+            $table->string('name', 150);
 
             // Foreign UUID to work_place_categories table
             $table->foreignId('workPlaceCatagoryId')

@@ -12,6 +12,7 @@ class WorkPlace extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['name', 'categoryId', 'censusNo'];
     /**
      * All appointments in this workplace.
      */
@@ -23,6 +24,11 @@ class WorkPlace extends Model
     public function catagory(): BelongsTo
     {
         return $this->belongsTo(WorkPlaceCatagory::class, 'catagoryId', 'id');
+    }
+
+    public function contactInfo()
+    {
+        return $this->hasOne(WorkPlaceContactInfo::class, 'workPlaceId');
     }
 
     public function school(): HasOne
@@ -51,6 +57,14 @@ class WorkPlace extends Model
             3 => $this->ministry(),
             default => null,
         };
+    }
+
+    public function scopeSearch($query, $term)
+    {
+        return $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', "%{$term}%")
+            ->orWhere('censusNo', 'like', "%{$term}%");
+        });
     }
 
 }

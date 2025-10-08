@@ -5,15 +5,24 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreOfficeRequest;
 use App\Http\Requests\UpdateOfficeRequest;
 use App\Models\Office;
+use App\Services\UserDashboardService;
 
 class OfficeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    protected $teacherService;
+
+    public function __construct(UserDashboardService $office)
+    {
+        $this->office = $office;
+    }
+
     public function index()
     {
-        //
+        $teacherCounts = $this->office->getOfficeStatsFor(auth()->user());
+        return view('office.dashboard',compact('officeCounts'));
     }
 
     /**

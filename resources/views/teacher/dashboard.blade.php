@@ -25,6 +25,13 @@
 
                 <div class="mt-8 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex justify-end items-center p-6 gap-2">
+                        @if (Auth::user()->hasPermission('slts_register'))
+                        <a href="{{ route('teacher.register') }}"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
+                            Register
+                        </a>
+                        @endif
+                        @if (Auth::user()->hasPermission('slts_search'))
                         <button x-data=""
                             x-on:click.prevent="$dispatch('open-modal', 'teacher-search')"
                             class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
@@ -33,11 +40,13 @@
                         <x-modal name="teacher-search" :show="$errors->userDeletion->isNotEmpty()" focusable>
                             <livewire:teacher-search />
                         </x-modal>
-
+                        @endif
+                        @if (Auth::user()->hasPermission('slts_report_list'))
                         <a href="{{ route('teacher.reportlist') }}"
                             class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
                             Reports
                         </a>
+                        @endif
                     </div>
                 </div>
 

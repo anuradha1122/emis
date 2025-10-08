@@ -28,10 +28,10 @@ class LocationInfo extends Model
     /**
      * Education Division (from offices table).
      */
-    public function educationDivision(): BelongsTo
-    {
-        return $this->belongsTo(Office::class, 'educationDivisionId', 'id');
-    }
+    // public function educationDivision(): BelongsTo
+    // {
+    //     return $this->belongsTo(Office::class, 'educationDivisionId', 'id');
+    // }
 
     /**
      * GN Division.
@@ -40,4 +40,10 @@ class LocationInfo extends Model
     {
         return $this->belongsTo(GnDivision::class, 'gnDivisionId', 'id');
     }
+
+    public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class, 'educationDivisionId', 'id');
+    }
+
 }

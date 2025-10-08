@@ -1,56 +1,117 @@
 <x-app-layout>
-    <div class="py-3">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <x-breadcrumb :list="$option" />
-            <div class="p-1 rounded shadow-md flex justify-end space-x-2">
-                <x-link-icon-button background="bg-red-500" textcolor="text-white" link="school.reports" icon="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" text="Reports" />
-                <x-link-icon-button background="bg-green-500" textcolor="text-white" link="school.search" icon="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" text="Search" />
-            </div>
-            <div class="bg-white my-2 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-2 text-gray-900">
-                    <div class="mx-auto px-6 lg:px-8">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            @foreach ($card_pack_1 as $card)
-                                <x-dashboard-card icon="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" text="{{ $card->name }}" number="{{ $card->user_count }}" linkid="{{ $card->id }}" link="teacher.dashboard" />
-                            @endforeach
-                        </div>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-700 dark:text-gray-500 leading-tight">
+            {{ __('Principal Dashboard') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
+        <div class="mx-auto sm:px-6 lg:px-8">
+            <!-- Content Area -->
+            <main class="flex-1 overflow-y-auto">
+                <div class="mb-6">
+                    <!-- Breadcrumb -->
+                    <x-breadcrumb :items="[
+                        'Home' => route('dashboard'),
+                        'Office Dashboard' => null,
+                    ]" />
+                </div>
+
+                <div class="mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100"></h2>
+                    <p class="text-gray-600 dark:text-gray-300">Manage View Office
+                    </p>
+                </div>
+
+                <div class="mt-8 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-end items-center p-6 gap-2">
+                        <a href="{{ route('principal.register') }}"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
+                            Register
+                        </a>
+                        <button x-data=""
+                            x-on:click.prevent="$dispatch('open-modal', 'principal-search')"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
+                            Search
+                        </button>
+                        <x-modal name="principal-search" :show="$errors->userDeletion->isNotEmpty()" focusable>
+                            <livewire:principal-search />
+                        </x-modal>
+
+                        <a href="{{ route('principal.reportlist') }}"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white dark:text-gray-100 font-bold py-3 px-8 rounded-full transition duration-300">
+                            Reports
+                        </a>
                     </div>
                 </div>
-            </div>
-            <div class="bg-white my-2 overflow-hidden shadow-sm sm:rounded-lg sm:block hidden">
-                <div id="chart_div" class="w-full overflow-hidden"></div>
-            </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+                    {{-- Appointment ≥ 10 years --}}
+                    <x-dashboard-card
+                    title="Service < 30 Years"
+                    icon="calendar-check"  {{-- indicates current appointment --}}
+                    value="{{ $principalCounts['service_under_30'] }}"
+                    trend="See"
+                    trendText="List"
+                    trendColor="purple"
+                    />
+
+                    {{-- Service ≥ 30 years --}}
+                    <x-dashboard-card
+                    title="Service ≥ 30 Years"
+                    icon="award"  {{-- indicates long service / achievement --}}
+                    value="{{$principalCounts['service_over_30'] }}"
+                    trend="See"
+                    trendText="List"
+                    trendColor="red"
+                    />
+
+
+
+                    <x-dashboard-card
+                        title="Male Principals"
+                        icon="mars"
+                        value="{{ $principalCounts['male_count'] }}"
+                        trend="See"
+                        trendText="List"
+                        trendColor="blue"
+                    />
+
+
+                    <x-dashboard-card
+                        title="Female Principals"
+                        icon="venus"
+                        value="{{ $principalCounts['female_count'] }}"
+                        trend="See"
+                        trendText="List"
+                        trendColor="pink"
+                    />
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <x-chart-card
+                        id="ageChart"
+                        :labels="array_keys($principalCounts['ageGroups'])"
+                        :data="array_values($principalCounts['ageGroups'])"
+                        title="Principal Appointment Periods"
+                        type="bar"
+                        dataset-label="Principals"
+                    />
+
+                    <x-chart-card
+                        id="provinceChart"
+                        :labels="array_keys($principalCounts['appointmentPeriods'])"
+                        :data="array_values($principalCounts['appointmentPeriods'])"
+                        title="Principal Age Groups"
+                        type="pie"
+                    />
+                </div>
+
+                @stack('scripts') {{-- This renders all the chart scripts --}}
+            </main>
         </div>
     </div>
 </x-app-layout>
-
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        google.charts.load('current', {'packages':['bar']});
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-            var data = google.visualization.arrayToDataTable(@json($chartData));
-
-            var options = {
-            legend: { position: 'none' },
-            chart: {
-                title: '',
-                subtitle: '' },
-            axes: {
-                x: {
-                0: { side: 'top', label: 'Catagory By Amount'} // Top x-axis.
-                }
-            },
-            bar: { groupWidth: "90%" }
-            };
-
-            var chart = new google.charts.Bar(document.getElementById('chart_div'));
-            // Convert the Classic options to Material options.
-            chart.draw(data, google.charts.Bar.convertOptions(options));
-        }
-        window.addEventListener('resize', function(){
-            drawChart();
-        });
-    });
-</script>

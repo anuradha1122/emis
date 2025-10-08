@@ -21,8 +21,6 @@ use App\Models\Office;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelWriter;
 use App\Exports\TeacherFullReportExport;
-//use Barryvdh\DomPDF\Facade\Pdf;
-use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 
 class TeacherFullReport extends Component
@@ -337,12 +335,6 @@ class TeacherFullReport extends Component
 
         return Excel::download(new TeacherFullReportExport($userIds), 'teacher_full_report.xlsx');
     }
-
-    public function exportPDF()
-    {
-        return redirect()->route('teacher.fullreportpdf', request()->query());
-    }
-
 
     public function render()
     {

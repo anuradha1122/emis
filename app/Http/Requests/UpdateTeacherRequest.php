@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTeacherRequest extends FormRequest
 {
@@ -21,26 +22,44 @@ class UpdateTeacherRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $section = $this->input('section');
+        $teacherId = $this->input('id');
+        //dd($section, $teacherId);
+        $rules = [];
 
-            'nic' => ['sometimes', 'required', 'unique:users,nic', 'regex:/^([0-9]{9}[VvXx]|[0-9]{12})$/'],
-            'name' => ['sometimes','required', 'string', 'max:100'],
-            'permAddressLine1' => ['sometimes', 'nullable', 'max:100'],
-            'permAddressLine2' => ['sometimes', 'nullable', 'max:100'],
-            'permAddressLine3' => ['sometimes', 'nullable', 'max:100'],
-            'tempAddressLine1' => ['sometimes', 'nullable', 'max:100'],
-            'tempAddressLine2' => ['sometimes', 'nullable', 'max:100'],
-            'tempAddressLine3' => ['sometimes', 'nullable', 'max:100'],
-            'mobile1' => ['sometimes','nullable','string','unique:contact_infos,mobile1','unique:contact_infos,mobile2','regex:/^[0-9]{10}$/'],
-            'mobile2' => ['sometimes','nullable','string','unique:contact_infos,mobile1','unique:contact_infos,mobile2','regex:/^[0-9]{10}$/'],
-            'email' => ['sometimes', 'nullable', 'email', 'unique:users,email', 'max:100'],
-            'race' => ['sometimes', 'nullable', 'not_in:0'],
-            'religion' => ['sometimes', 'nullable', 'not_in:0'],
-            'civilStatus' => ['sometimes', 'nullable', 'not_in:0'],
-            'birthDay' => ['sometimes', 'nullable', 'date', 'before:today'],
-            'rank' => ['nullable'],
-            'rankedDay' => ['nullable', 'date', 'before:today'],
-            'newAppointmentStartDay' => ['sometimes', 'nullable', 'date'],
-        ];
+        if ($section === 'personal') {
+            $rules = [
+                'name' => 'required|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'nic' => [
+                    'required',
+                    'string',
+                    'regex:/^\d{9}[vVxX]$|^\d{12}$/',
+                    Rule::unique('users', 'nic')->ignore($teacherId),
+                ],
+                'birthDay' => 'nullable|date',
+                'perm_address1' => 'nullable|string|max:255',
+                'perm_address2' => 'nullable|string|max:255',
+                'perm_address3' => 'nullable|string|max:255',
+                'res_address1' => 'nullable|string|max:255',
+                'res_address2' => 'nullable|string|max:255',
+                'res_address3' => 'nullable|string|max:255',
+                'mobile1' => 'nullable|string|max:20',
+                'mobile2' => 'nullable|string|max:20',
+            ];
+        }
+
+        if ($section === 'personal-info') {
+            //dd('here');
+            $rules = [
+                'race' => 'required|exists:races,id',
+                'religion' => 'required|exists:religions,id',
+                'civilStatus' => 'required|exists:civil_statuses,id',
+                'genders' => 'required|string',
+            ];
+        }
+
+        return $rules;
     }
+
 }

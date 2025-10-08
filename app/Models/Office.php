@@ -86,4 +86,25 @@ class Office extends Model
         return null;
     }
 
+    public function allZoneSchools()
+    {
+        // Only works if this office is a Zone (officeTypeId = 2)
+        if ($this->officeTypeId != 2) {
+            return $this->hasMany(School::class, 'id', 'id') // dummy relation
+                ->whereRaw('1 = 0'); // always empty
+        }
+
+        // Zone → Divisions → Schools
+        return $this->hasManyThrough(
+            School::class,      // Final model
+            Office::class,      // Intermediate model (division offices)
+            'higherOfficeId',   // FK on divisions → zone.id
+            'officeId',         // FK on schools → division.id
+            'id',               // Local key on zone.id
+            'id'                // Local key on division.id
+        );
+    }
+
+
+
 }

@@ -50,6 +50,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @if (Auth::user()->hasPermission('slts_full_report'))
                                 <tr class="border-b border-gray-200 dark:border-gray-700">
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">#1001</td>
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Teacher Full Report</td>
@@ -61,6 +62,8 @@
                                         <a href="{{ route('teacher.fullreport') }}" class="text-blue-500 dark:text-blue-400 hover:underline">View</a>
                                     </td>
                                 </tr>
+                                @endif
+                                @if (Auth::user()->hasPermission('slts_full_report_pdf'))
                                 <tr class="border-b border-gray-200 dark:border-gray-700">
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">#1002</td>
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Teacher Full Report PDF</td>
@@ -68,9 +71,22 @@
                                         <span class="px-2 py-1 text-xs text-white bg-red-500 rounded">PDF</span>
                                     </td>
                                     <td class="py-3 px-4">
-                                        <a href="{{ route('teacher.fullreportpdf') }}" class="text-blue-500 dark:text-blue-400 hover:underline">View</a>
+                                        <a href="{{ route('teacher.fullreportPDF') }}" class="text-blue-500 dark:text-blue-400 hover:underline">View</a>
                                     </td>
                                 </tr>
+                                @endif
+
+                                {{-- <tr class="border-b border-gray-200 dark:border-gray-700">
+                                    <td class="py-3 px-4 text-gray-700 dark:text-gray-300">#1003</td>
+                                    <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Teacher Transfer Report</td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-1 text-xs text-white bg-blue-500 rounded">Web</span>
+                                        <span class="px-2 py-1 text-xs text-white bg-green-500 rounded">Excel</span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <a href="{{ route('teacher.transferreport') }}" class="text-blue-500 dark:text-blue-400 hover:underline">View</a>
+                                    </td>
+                                </tr> --}}
                             </tbody>
                         </table>
                     </div>

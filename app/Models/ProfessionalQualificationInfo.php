@@ -11,9 +11,17 @@ class ProfessionalQualificationInfo extends Model
 
     protected $fillable = [
         'userId',
-        'professionalQualificationId',
+        'profQualiId',
         'effectiveDate',
         'description',
         'active',
     ];
+
+    public function professionalQualification()
+    {
+        return $this->belongsTo(ProfessionalQualification::class, 'profQualiId')
+                    ->where('active', 1);
+    }
+
+
 }

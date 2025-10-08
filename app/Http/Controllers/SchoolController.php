@@ -2,16 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreSchoolRequest;
-use App\Http\Requests\StoreSchoolClassListRequest;
-use App\Http\Requests\UpdateSchoolRequest;
-use Illuminate\Http\Request;
 use App\Models\School;
+use Illuminate\Http\Request;
+use App\Models\SchoolReligion;
+use App\Models\SchoolAuthority;
+use App\Models\SchoolClass;
+use App\Models\SchoolDensity;
+use App\Models\SchoolFacility;
+use App\Models\SchoolGender;
+use App\Models\SchoolLanguage;
+use App\Models\SchoolEthnicity;
 use App\Models\SchoolClassList;
+use App\Models\WorkPlace;
+use App\Models\WorkPlaceContactInfo;
 use Illuminate\Support\Facades\DB;
+use App\Services\UserDashboardService;
+use App\Http\Requests\StoreSchoolRequest;
+use App\Http\Requests\UpdateSchoolRequest;
+use App\Http\Requests\StoreSchoolClassListRequest;
+use Illuminate\Support\Facades\Crypt;
 
 class SchoolController extends Controller
 {
+
+    protected $schoolData;
+
+    public function __construct(UserDashboardService $schoolData)
+    {
+        $this->schoolData = $schoolData;
+    }
+
+    public function index()
+    {
+        $schoolCountsArray = $this->schoolData->getSchoolStatsFor(auth()->user());
+        $schoolCounts = (object) $schoolCountsArray;
+        return view('school.dashboard', compact('schoolCounts'));
+    }
+
 
     public function search()
     {
@@ -22,114 +49,44 @@ class SchoolController extends Controller
         return view('school/search',compact('option'));
     }
 
-    public function profile($id = null)
+    public function profile(Request $request)
     {
-        if(!session('schoolId') && isset($id)){
-            $schoolId = $id;
-            $chartData = [
-                ['Book Catagory', 'Amount'],
-                ["Novels", 44],
-                ["Short Story", 31],
-                ["Documantary", 12],
-                ["Children's Boos", 10],
-                ['Other', 3]
-            ];
-            $option = [
-                'Dashboard' => 'dashboard',
-                'School Search' => 'school.search',
-                'School Dashboard' => route('school.profile', ['id' => $id]),
-            ];
+        $decryptedId = Crypt::decryptString($request->id);
 
-            $card_pack_1 = collect([
-                (object) [
-                    'id' => 1,
-                    'name' => 'Teacher',
-                    'user_count' => 15,
-                ],
-                (object) [
-                    'id' => 2,
-                    'name' => 'Principal',
-                    'user_count' => 5,
-                ],
-                (object) [
-                    'id' => 3,
-                    'name' => 'SLEAS',
-                    'user_count' => 10,
-                ],
-                (object) [
-                    'id' => 4,
-                    'name' => 'SLAS',
-                    'user_count' => 8,
-                ],
-                (object) [
-                    'id' => 5,
-                    'name' => 'Development Officer',
-                    'user_count' => 12,
-                ],
-            ]);
-            //dd($card_pack_1);
-
-        }elseif (session('schoolId') && !isset($id)) {
-            $schoolId = session('schoolId');
-            $chartData = [
-                ['Book Catagory', 'Amount'],
-                ["Novels", 44],
-                ["Short Story", 31],
-                ["Documantary", 12],
-                ["Children's Boos", 10],
-                ['Other', 3]
-            ];
-            $option = [
-                'Dashboard' => 'dashboard',
-                'School Profile' => route('school.profile'),
-            ];
-
-            $card_pack_1 = collect([
-                (object) [
-                    'id' => 1,
-                    'name' => 'Teacher',
-                    'user_count' => 5,
-                ],
-                (object) [
-                    'id' => 2,
-                    'name' => 'Principal',
-                    'user_count' => 5,
-                ],
-                (object) [
-                    'id' => 3,
-                    'name' => 'SLEAS',
-                    'user_count' => 10,
-                ],
-                (object) [
-                    'id' => 4,
-                    'name' => 'SLAS',
-                    'user_count' => 8,
-                ],
-                (object) [
-                    'id' => 5,
-                    'name' => 'Development Officer',
-                    'user_count' => 12,
-                ],
-            ]);
-
-        }
-        else{
-            return redirect()->route('dashboard');
+        // ---------- Teacher profile ----------
+        $school = WorkPlace::with([
+                'contactInfo',
+                'school',
+                'school.office',
+                'school.authority',
+                'school.classType',
+                'school.density',
+                'school.facility',
+                'school.ethnicity',
+                'school.language',
+                'school.religion',
+                'school.gender'
+            ])
+            ->find($decryptedId);
+        //dd($school->school->authority->name);
+        if (!$school) {
+            abort(404, 'School not found');
         }
 
-        $school_detail = School::join('work_places', 'schools.workPlaceId', '=', 'work_places.id')
-        ->join('offices', 'schools.officeId', '=', 'offices.id')
-        ->join('work_places AS divisions', 'offices.workPlaceId', '=', 'divisions.id')
-        ->where('schools.id', $schoolId)
-        ->where('schools.active', 1)
-        ->select(
-            'schools.id',
-            'work_places.name',
-            'divisions.name AS division',
-        )
-        ->first();
+        // ---------- Return to Blade ----------
+        return view('school.profile', compact(
+            'school'
+        ));
+    }
 
-        return view('school/dashboard',compact('option','card_pack_1','chartData','school_detail'));
+    public function reportlist()
+    {
+        return view('school.reportlist');
+    }
+
+    public function fullreport()
+    {
+        return view('school.full-report');
     }
 
     /**
@@ -323,58 +280,7 @@ class SchoolController extends Controller
 
     }
 
-    // Custom function to determine class range start based on the grade key
-    public function getClassRangeStart($gradeKey)
-    {
-        switch ($gradeKey) {
-            case 'grade1':
-                return 1;
-            case 'grade2':
-                return 26;
-            case 'grade3':
-                return 51;
-            case 'grade4':
-                return 76;
-            case 'grade5':
-                return 101;
-            case 'grade6':
-                return 126;
-            case 'grade7':
-                return 151;
-            case 'grade8':
-                return 176;
-            case 'grade9':
-                return 201;
-            case 'grade10':
-                return 226;
-            case 'grade11':
-                return 251;
-            case 'grade12art':
-                return 276;
-            case 'grade12commerce':
-                return 301;
-            case 'grade12science':
-                return 326;
-            case 'grade12technology':
-                return 351;
-            case 'grade1213years':
-                return 376;
-            case 'grade13art':
-                return 401;
-            case 'grade13commerce':
-                return 426;
-            case 'grade13science':
-                return 451;
-            case 'grade13technology':
-                return 476;
-            case 'grade1313years':
-                return 501;
-            case 'specialedu':
-                return 526;
-            default:
-                return 1; // Default to class 1 if no match
-        }
-    }
+
 
 
 
@@ -384,7 +290,28 @@ class SchoolController extends Controller
      */
     public function create()
     {
-        //
+
+        $schoolAuthorityList = SchoolAuthority::select('id','name')->get();
+        $schoolEthnicityList = SchoolEthnicity::select('id','name')->get();
+        $schoolClassList = SchoolClass::select('id','name')->get();
+        $schoolDensityList = SchoolDensity::select('id','name')->get();
+        $schoolFacilityList = SchoolFacility::select('id','name')->get();
+        $schoolGenderList = SchoolGender::select('id','name')->get();
+        $schoolLanguageList = SchoolLanguage::select('id','name')->get();
+        $schoolMainReligionList = SchoolReligion::select('id','name')->get();
+
+        $office = auth()->user()?->currentService?->currentAppointment?->workPlace?->office;
+
+        return view('school.register',compact(
+            'schoolAuthorityList',
+            'schoolEthnicityList',
+            'schoolClassList',
+            'schoolDensityList',
+            'schoolFacilityList',
+            'schoolGenderList',
+            'schoolLanguageList',
+            'schoolMainReligionList',
+        ));
     }
 
     /**
@@ -392,7 +319,46 @@ class SchoolController extends Controller
      */
     public function store(StoreSchoolRequest $request)
     {
-        //
+        //dd($request->all());
+        DB::beginTransaction();
+
+        try {
+            // 1️⃣ Create the workplace (core info)
+            $workPlace = WorkPlace::create([
+                'name'      => $request->name,
+                'censusNo'  => $request->census,
+                'categoryId'=> 1, // School category
+            ]);
+            //dd($workPlace);
+            WorkPlaceContactInfo::create([
+                'workPlaceId' => $workPlace->id,
+                'addressLine1'     => $request->addressLine1,
+                'addressLine2'     => $request->addressLine2,
+                'addressLine3'     => $request->addressLine3,
+                'mobile1'      => $request->mobile,
+            ]);
+
+            // 3️⃣ Create school with link to workplace
+            School::create([
+                'workPlaceId'   => $workPlace->id,
+                'officeId'      => $request->division,
+                'authorityId'   => $request->authorities,
+                'ethnicityId'   => $request->ethnicity,
+                'classId'       => $request->class,
+                'densityId'     => $request->density,
+                'facilityId'    => $request->facility,
+                'genderId'      => $request->gender,
+                'languageId'    => $request->language,
+                'religionId'    => $request->religion,
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'School information saved successfully.');
+        } catch (\Exception $e) {
+            //DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to register school: ' . $e->getMessage()]);
+        }
     }
 
     /**

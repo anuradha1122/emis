@@ -13,7 +13,6 @@ class School extends Model
     protected $fillable = [
         'workPlaceId',
         'officeId',
-        'name',
         'authorityId',
         'ethnicityId',
         'languageId',

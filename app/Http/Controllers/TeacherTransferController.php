@@ -123,6 +123,11 @@ class TeacherTransferController extends Controller
         return view('teacher/transferform',compact('option','binaryList','teachingGradeList','zoneSchools'));
     }
 
+    public function transferreport()
+    {
+        return view('teacher.transfer-report');
+    }
+
     /**
      * Show the form for creating a new resource.
      */

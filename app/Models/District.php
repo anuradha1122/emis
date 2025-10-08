@@ -28,4 +28,6 @@ class District extends Model
         return $this->hasMany(Office::class, 'districtId', 'id')
                     ->where('officeTypeId', 2);
     }
+
+
 }

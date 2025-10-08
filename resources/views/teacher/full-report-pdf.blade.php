@@ -111,7 +111,7 @@
                                 Get Web
                             </button>
 
-                            <a href="{{ route('teacher.fullreportpdf') }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
+                            <a href="{{ route('teacher.fullreportPDF') }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
                                 focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
                                 text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
                                     Refresh

@@ -34,4 +34,39 @@ class PrincipalTransfer extends Model
         'active',
     ];
 
+    public function userService()
+    {
+        return $this->belongsTo(UserInService::class, 'userServiceId', 'id');
+    }
+
+    public function school1()
+    {
+        return $this->belongsTo(School::class, 'school1Id', 'id')
+                    ->with('workPlace'); // eager load the workPlace
+    }
+
+    public function school2()
+    {
+        return $this->belongsTo(School::class, 'school2Id', 'id')
+                    ->with('workPlace');
+    }
+
+    public function school3()
+    {
+        return $this->belongsTo(School::class, 'school3Id', 'id')
+                    ->with('workPlace');
+    }
+
+    public function school4()
+    {
+        return $this->belongsTo(School::class, 'school4Id', 'id')
+                    ->with('workPlace');
+    }
+
+    public function school5()
+    {
+        return $this->belongsTo(School::class, 'school5Id', 'id')
+                    ->with('workPlace');
+    }
+
 }

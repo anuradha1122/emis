@@ -18,7 +18,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/">
-                    <img src="{{ asset('storage/systemphotos/logo.jpeg') }}" alt="" class="h-20 w-20 text-primary-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <img src="{{ asset('images/logo.png') }}" alt="" class="h-20 w-20 text-primary-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     {{-- <x-application-logo class="w-20 h-20 fill-current text-gray-500" /> --}}
                 </a>
             </div>

@@ -11,45 +11,45 @@
             <main class="flex-1 overflow-y-auto">
                 <div class="mb-6">
                     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100"></h2>
-                    <p class="text-gray-600 dark:text-gray-300">Welcome back, Madusanka! Here's what's happening today.
+                    <p class="text-gray-600 dark:text-gray-300">
                     </p>
                 </div>
 
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <x-dashboard-card
-                        title="Schools"
+                        title="National Schools"
                         icon="school"
-                        value="10194"
-                        trend="change"
-                        trendText="School"
+                        value="{{ $mainCount['national_school_count'] }}"
+                        trend=""
+                        trendText=""
                         trendColor="green"
                     />
 
                     <x-dashboard-card
-                        title="Teachers"
-                        icon="users"
-                        value="254323"
-                        trend="change"
-                        trendText="Teachers"
+                        title="Provincial Schools"
+                        icon="school"
+                        value="{{ $mainCount['provincial_school_count'] }}"
+                        trend=""
+                        trendText=""
                         trendColor="blue"
                     />
 
                     <x-dashboard-card
-                        title="principals"
+                        title="Principals"
                         icon="user-check"
-                        value="6543"
-                        trend="change"
-                        trendText="Principals"
+                        value="{{ $mainCount['principal_service_count'] }}"
+                        trend=""
+                        trendText=""
                         trendColor="yellow"
                     />
 
                     <x-dashboard-card
-                        title="Students"
+                        title="Teachers"
                         icon="globe"
-                        value="4534543"
-                        trend="change"
-                        trendText="Students"
+                        value="{{ $mainCount['teacher_service_count'] }}"
+                        trend=""
+                        trendText=""
                         trendColor="purple"
                     />
                 </div>
@@ -83,14 +83,14 @@
                         </div>
                         <div class="flex justify-center">
                             <div class="mx-auto">
-                                <canvas id="provinceChart" ></canvas>
+                                <canvas id="languageChart" ></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Recent Orders Table -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+                {{-- <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                         <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100">Recent Orders</h3>
                         <button
@@ -161,26 +161,24 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div> --}}
             </main>
         </div>
     </div>
 
     <script type="module">
-        // Students Province Pie Chart
-        const ctx = document.getElementById('provinceChart').getContext('2d');
+        const ctx = document.getElementById('languageChart').getContext('2d');
         new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: {!! json_encode(array_keys($students)) !!},
+                labels: ['Sinhala Medium', 'Tamil Medium'], // Chart labels
                 datasets: [{
-                    label: 'Number of Students',
-                    data: {!! json_encode(array_values($students)) !!},
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56',
-                        '#4BC0C0', '#9966FF', '#FF9F40',
-                        '#C9CBCF', '#00A36C', '#B5651D'
-                    ]
+                    label: 'Number of Schools',
+                    data: [
+                        {{ $mainCount['sinhala_medium_count'] }},
+                        {{ $mainCount['tamil_medium_count'] }}
+                    ],
+                    backgroundColor: ['#FF6384', '#36A2EB']
                 }]
             },
             options: {
@@ -191,7 +189,7 @@
                     },
                     title: {
                         display: true,
-                        text: 'Provinces Vs total students',
+                        text: 'Schools by Medium',
                         font: {
                             size: 16
                         },
@@ -201,12 +199,12 @@
                         }
                     }
                 }
-
             }
         });
     </script>
 
-    <script>
+
+    {{-- <script>
         // Teacher vs Student Bar Chart
         document.addEventListener('DOMContentLoaded', function() {
             const ctx1 = document.getElementById('genderChart').getContext('2d');
@@ -296,7 +294,7 @@
                 }
             });
         });
-    </script>
+    </script> --}}
 
 
 

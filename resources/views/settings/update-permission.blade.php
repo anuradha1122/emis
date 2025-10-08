@@ -39,12 +39,12 @@
 
                             <!-- 1. Select dropdown -->
                             <div class="mb-4">
-                                <label for="position" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
-                                    Select Position
+                                <label for="role" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                    Select Role
                                 </label>
-                                <select name="position_id" id="position" class="w-full border-gray-300 dark:border-gray-600 rounded-lg p-2 dark:bg-gray-700 dark:text-white">
-                                    @foreach ($positions as $position)
-                                        <option value="{{ $position->id }}">{{ $position->name }}</option>
+                                <select name="role_id" id="role" class="w-full border-gray-300 dark:border-gray-600 rounded-lg p-2 dark:bg-gray-700 dark:text-white">
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -64,9 +64,7 @@
 
 
                             <!-- 3. Submit button -->
-                            <button type="submit" class="px-4 py-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg hover:bg-primary-600 dark:hover:bg-primary-700 text-sm">
-                                Assign Permissions
-                            </button>
+                            <x-form-button-primary size="" text="Assign Permission" modelBinding=""/>
                         </form>
                     </div>
                 </div>

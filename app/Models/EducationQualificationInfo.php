@@ -11,9 +11,19 @@ class EducationQualificationInfo extends Model
 
     protected $fillable = [
         'userId',
-        'educationQualificationId',
+        'eduQualiId',
         'effectiveDate',
         'description',
         'active',
     ];
+
+    public function educationQualification()
+    {
+        return $this->belongsTo(EducationQualification::class, 'eduQualiId')
+                    ->where('active', 1);
+    }
+
+
+
+
 }

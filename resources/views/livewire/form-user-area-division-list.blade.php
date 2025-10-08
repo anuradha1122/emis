@@ -1,0 +1,44 @@
+<div class="w-full grid grid-cols-1 gap-y-1 sm:grid-cols-2">
+    @if (auth()->user()->workplaceType() == 'ministry')
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="province" value="Province" />
+            <x-form-list-input-field name="province" id="province" :options="$provinceList" wire:model.live="selectedProvince"/>
+        </div>
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="district" value="District" />
+            <x-form-list-input-field name="district" id="district" :options="$districtList" wire:model.live="selectedDistrict"/>
+        </div>
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="zone" value="Zone" />
+            <x-form-list-input-field name="zone" id="zone" :options="$zoneList" wire:model.live="selectedZone"/>
+        </div>
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="division" value="Division" />
+            <x-form-list-input-field name="division" id="division" :options="$divisionList"/>
+        </div>
+    @elseif (auth()->user()->workplaceType() == 'provincial_department')
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="district" value="District" />
+            <x-form-list-input-field name="district" id="district" :options="$districtList" wire:model.live="selectedDistrict"/>
+        </div>
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="zone" value="Zone" />
+            <x-form-list-input-field name="zone" id="zone" :options="$zoneList" wire:model.live="selectedZone"/>
+        </div>
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="division" value="Division" />
+            <x-form-list-input-field name="division" id="division" :options="$divisionList"/>
+        </div>
+    @elseif (auth()->user()->workplaceType() == 'zone')
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="division" value="Division" />
+            <x-form-list-input-field name="division" id="division" :options="$divisionList" wire:model.live="selectedDivision"/>
+        </div>
+    @elseif (auth()->user()->workplaceType() == 'division')
+        <div class="sm:col-span-1 px-1">
+            <x-form-input-label for="school" value="School" />
+            <x-form-list-input-field name="school" id="school" :options="$divisionList"/>
+        </div>
+    @endif
+</div>
+

@@ -22,10 +22,22 @@ class TeacherSearch extends Component
 
     private function searchTeachers()
     {
-        if (strlen($this->search) < 2) {
+        if (strlen($this->search) < 1) {
             return collect(); // return empty collection if search too short
         }
-        return User::searchUsers($this->search, 1)->paginate(8);
+
+        $results = User::searchUsers($this->search, 1)
+            ->whereHas('currentService', function ($query) {
+                $query->where('serviceId', 1); // only current principal service
+            })
+            ->paginate(8);
+
+        $results->getCollection()->transform(function ($item) {
+            $item->usId = Crypt::encryptString($item->id);
+            return $item;
+        });
+
+        return $results;
     }
 
     public function render()

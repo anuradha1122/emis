@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserInService extends Model
@@ -16,6 +17,13 @@ class UserInService extends Model
         'userId', 'serviceId', 'appointedDate', 'releasedDate', 'current'
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope('active', function (Builder $builder) {
+            $builder->where('active', 1);
+        });
+    }
+
     /**
      * Scope for current service rows (releasedDate is null).
      */
@@ -25,24 +33,25 @@ class UserInService extends Model
     }
 
     /**
-     * The user who owns this service record.
+     * Scope for previous service rows (releasedDate is not null).
      */
+    public function scopePrevious(Builder $query): Builder
+    {
+        return $query->whereNotNull('releasedDate');
+    }
+
+    // Relationships ----------------------
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userId', 'id');
     }
 
-    /**
-     * (Optional) Relation to Service model if you have services table.
-     */
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class, 'serviceId', 'id');
     }
 
-    /**
-     * Has many appointments.
-     */
     public function appointments(): HasMany
     {
         return $this->hasMany(UserServiceAppointment::class, 'userServiceId', 'id');
@@ -56,9 +65,24 @@ class UserInService extends Model
             ->when($type, fn($q) => $q->where('appointmentType', $type));
     }
 
-    // One UserInService has many TeacherTransfers
     public function teacherTransfers()
     {
-        return $this->hasMany(TeacherTransfer::class, 'userId', 'id');
+        return $this->hasMany(TeacherTransfer::class, 'userServiceId', 'id');
+    }
+
+    public function teacherService(): HasOne
+    {
+        return $this->hasOne(TeacherService::class, 'userServiceId', 'id');
+    }
+
+    public function principalService(): HasOne
+    {
+        return $this->hasOne(PrincipalService::class, 'userServiceId', 'id');
+    }
+
+    public function serviceInRanks(): HasMany
+    {
+        return $this->hasMany(UserServiceInRank::class, 'userServiceId', 'id');
     }
 }
+
