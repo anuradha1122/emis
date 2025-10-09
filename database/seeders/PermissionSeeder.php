@@ -39,7 +39,8 @@ class PermissionSeeder extends Seeder
             ['name' => 'slts_education_edit', 'categoryId' => 4, 'description' => 'SLTS user education Info Edit'],
             ['name' => 'slts_professional_edit', 'categoryId' => 4, 'description' => 'SLTS user professional Info Edit'],
             ['name' => 'slts_service_edit', 'categoryId' => 4, 'description' => 'SLTS user service Info Edit'],
-
+            ['name' => 'slts_appointment_edit', 'categoryId' => 4, 'description' => 'SLTS user appointment Info Edit'],
+            ['name' => 'slts_position_edit', 'categoryId' => 4, 'description' => 'SLTS user position Info Edit'],
             ['name' => 'slps_dashboard', 'categoryId' => 5, 'description' => 'SLPS dashboard'],
             ['name' => 'slps_register', 'categoryId' => 5, 'description' => 'SLPS Registration'],
             ['name' => 'slps_search', 'categoryId' => 5, 'description' => 'SLPS Search'],
@@ -56,6 +57,8 @@ class PermissionSeeder extends Seeder
             ['name' => 'slps_education_edit', 'categoryId' => 5, 'description' => 'SLPS user education Info Edit'],
             ['name' => 'slps_professional_edit', 'categoryId' => 5, 'description' => 'SLPS user professional Info Edit'],
             ['name' => 'slps_service_edit', 'categoryId' => 5, 'description' => 'SLPS user service Info Edit'],
+            ['name' => 'slps_appointment_edit', 'categoryId' => 4, 'description' => 'SLPS user appointment Info Edit'],
+            ['name' => 'slps_position_edit', 'categoryId' => 4, 'description' => 'SLPS user position Info Edit'],
 
             ['name' => 'school_dashboard', 'categoryId' => 2, 'description' => 'School dashboard'],
             ['name' => 'school_register', 'categoryId' => 2, 'description' => 'School Registration'],

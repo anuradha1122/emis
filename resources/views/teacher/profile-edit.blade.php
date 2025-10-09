@@ -487,6 +487,52 @@
                     </form>
                     @endif
 
+                    @if($section === 'position-info')
+                        {{-- {{ dd($positions); }} --}}
+                        <form action="{{ route('teacher.profileupdate', ['id' => $encryptedId]) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="id" value="{{ $decryptedId }}">
+                            <input type="hidden" name="section" value="position-info">
+
+                            <div class="grid sm:grid-cols-4 gap-4 mt-4">
+                                {{-- Appointment Selection --}}
+
+                                {{-- <x-form-list-input-section
+                                    size="sm:col-span-2"
+                                    name="position[new][userServiceAppId]"
+                                    id="position_userServiceAppId_new"
+                                    :options="$appointments->mapWithKeys(function($app) {
+                                        $label = ($app->workPlace->name ?? 'Unknown Workplace')
+                                            . ' (' . ($app->appointedDate ?? 'N/A')
+                                            . ' - ' . ($app->releasedDate ?? 'Present') . ')';
+                                        return [$app->id => $label];
+                                    })"
+                                    label="Select Appointment"
+                                    :selected="old('position.new.userServiceAppId')" /> --}}
+                                {{-- {{ dd($positions); }} --}}
+                                <x-form-list-input-section
+                                size="sm:col-span-1"
+                                name="position"
+                                id="position"
+                                :options="$positions"
+                                label="Race"
+                                :selected="old('race', optional($teacher->personalInfo)->raceId)" />
+
+
+                                {{-- Positioned Date --}}
+                                <x-form-date-input-section
+                                    size="sm:col-span-1"
+                                    name="position[new][positionedDate]"
+                                    id="position_positionedDate_new"
+                                    type="date"
+                                    label="Positioned Date"
+                                    value="{{ old('position.new.positionedDate') }}" />
+                            </div>
+
+                            <x-form-button-primary size="" text="Save Position Info" modelBinding="" />
+                        </form>
+                    @endif
+
                 </div>
             </main>
         </div>

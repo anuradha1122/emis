@@ -18,9 +18,9 @@ return new class extends Migration
             $table->foreignId('userId')->unique()->constrained('users')->restrictOnDelete();
 
             // Permanent address (all required)
-            $table->string('permAddressLine1', 80);
-            $table->string('permAddressLine2', 80);
-            $table->string('permAddressLine3', 80);
+            $table->string('permAddressLine1', 80)->nullable();
+            $table->string('permAddressLine2', 80)->nullable();
+            $table->string('permAddressLine3', 80)->nullable();
 
             // Temporary address (optional)
             $table->string('tempAddressLine1', 80)->nullable();
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('tempAddressLine3', 80)->nullable();
 
             // Mobile numbers
-            $table->string('mobile1', 15)->unique(); // primary, required
+            $table->string('mobile1', 15)->nullable()->unique(); // primary, required
             $table->string('mobile2', 15)->nullable(); // secondary, optional
 
             $table->tinyInteger('active')->default(1);

@@ -29,6 +29,7 @@ use App\Models\School;
 use App\Models\Race;
 use App\Models\Religion;
 use App\Models\CivilStatus;
+use App\Models\Position;
 use App\Models\EducationQualification;
 use App\Models\ProfessionalQualification;
 use App\Models\FamilyMemberType;
@@ -377,10 +378,11 @@ class TeacherController extends Controller
             2 => 'Female',
             default => 'Unknown',
         };
-        $teacher->race = optional($teacher->personalInfo->race)->name;
-        $teacher->religion = optional($teacher->personalInfo->religion)->name;
-        $teacher->civilStatus = optional($teacher->personalInfo->civilStatus)->name;
+        $teacher->race = optional(optional($teacher->personalInfo)->race)->name;
+        $teacher->religion = optional(optional($teacher->personalInfo)->religion)->name;
+        $teacher->civilStatus = optional(optional($teacher->personalInfo)->civilStatus)->name;
         $teacher->birthDay = optional($teacher->personalInfo)->birthDay;
+
         $teacher->educationDivision = $teacher->locationInfo?->office?->educationDivision?->name;
         $teacher->gnDivision = $teacher->locationInfo?->gnDivision?->name;
         $teacher->dsDivision = $teacher->locationInfo?->gnDivision?->dsDivision?->name;
@@ -477,9 +479,19 @@ class TeacherController extends Controller
                 'workPlace' => optional($app->workPlace)->name,
                 'appointedDate' => $app->appointedDate,
                 'releasedDate' => $app->releasedDate,
+                'positions' => $app->positions
+                    ->map(fn($pos) => [
+                        'id' => $pos->id,
+                        'positionName' => optional($pos->position)->name,
+                        'positionedDate' => $pos->positionedDate,
+                        'releasedDate' => $pos->releasedDate,
+                    ])
+                    ->values()
+                    ->toArray(),
             ])
             ->toArray()
         : [];
+        //dd($previousAppointments);
 
         // Current attached appointments (appointmentType = 2, releasedDate null)
         $currentAttachedAppointments = $currentService
@@ -491,6 +503,16 @@ class TeacherController extends Controller
                 'id' => $app->id,
                 'workPlace' => optional($app->workPlace)->name,
                 'appointedDate' => $app->appointedDate,
+                'positions' => $app->positions
+                    ->where('current', 1)
+                    ->where('active', 1)
+                    ->map(fn($pos) => [
+                        'id' => $pos->id,
+                        'positionName' => optional($pos->position)->name,
+                        'positionedDate' => $pos->positionedDate,
+                    ])
+                    ->values()
+                    ->toArray(),
             ])
             ->toArray()
         : [];
@@ -506,9 +528,19 @@ class TeacherController extends Controller
                 'workPlace' => optional($app->workPlace)->name,
                 'appointedDate' => $app->appointedDate,
                 'releasedDate' => $app->releasedDate,
+                'positions' => $app->positions
+                    ->map(fn($pos) => [
+                        'id' => $pos->id,
+                        'positionName' => optional($pos->position)->name,
+                        'positionedDate' => $pos->positionedDate,
+                        'releasedDate' => $pos->releasedDate,
+                    ])
+                    ->values()
+                    ->toArray(),
             ])
             ->toArray()
         : [];
+
 
         //dd($currentAppointments, $previousAppointments);
         // ---------- Education & Professional Qualifications ----------
@@ -593,9 +625,18 @@ class TeacherController extends Controller
             ]);
 
 
+        $userServiceId = $userService->id ?? null;
 
-        //dd($allUserServices);
+        $appointments = $userServiceId
+            ? UserServiceAppointment::with('workPlace')
+                ->where('userServiceId', $userServiceId)
+                ->orderBy('appointedDate', 'desc')
+                ->get()
+            : collect(); // empty collection if no service found
 
+        $positions = Position::where('active', 1)->get(['id', 'name']);
+
+        //dd($positions);
 
         $familyMemberTypes = FamilyMemberType::where('active', 1)->get(['id', 'name']);
 
@@ -628,6 +669,8 @@ class TeacherController extends Controller
             'services',
             'userService',
             'allUserServices',
+            'appointments',
+            'positions',
             'appointmentTypes',
             'familyMemberTypes',
             'educationQualifications',
@@ -988,68 +1031,104 @@ class TeacherController extends Controller
 
                 return redirect()->back()->with('success', 'Service updated successfully!');
 
-            case 'appointment-info':
-                $serviceData = $request->input('service.new', []);
-                $schoolId = $request->input('school'); // from Livewire
-                //dd($serviceData, $schoolId);
-                $appointmentType = $serviceData['appointmentType'] ?? 1; // 1 = Permanent, 2 = Attachment
-                $appointedDate = $serviceData['appointedDate'] ?? null;
-                $releasedDate = $serviceData['releasedDate'] ?? null;
+                case 'appointment-info':
+                    $serviceData = $request->input('service.new', []);
+                    $schoolId = $request->input('school'); // from Livewire
 
-                $workPlaceId = School::where('id', $schoolId)->value('workPlaceId');
-                $userServiceId = $serviceData['userInServiceId'] ?? null;
+                    $appointmentType = $serviceData['appointmentType'] ?? 1; // 1 = Permanent, 2 = Attachment
+                    $appointedDate = $serviceData['appointedDate'] ?? null;
+                    $releasedDate = $serviceData['releasedDate'] ?? null;
 
-                if (!$userServiceId || !$schoolId) {
-                    return back()->with('error', 'Service and School selection required.');
-                }
+                    $workPlaceId = School::where('id', $schoolId)->value('workPlaceId');
+                    $userServiceId = $serviceData['userInServiceId'] ?? null;
 
-                // Get current appointment (releasedDate = null)
-                $currentAppointment = UserServiceAppointment::where('userServiceId', $userServiceId)
-                    ->whereNull('releasedDate')
-                    ->latest('appointedDate')
-                    ->first();
-
-                // CASE 1: Both appointedDate & releasedDate
-                if ($appointedDate && $releasedDate) {
-                    UserServiceAppointment::create([
-                        'userServiceId' => $userServiceId,
-                        'workPlaceId'      => $workPlaceId,
-                        'appointmentType'=> $appointmentType,
-                        'appointedDate' => $appointedDate,
-                        'releasedDate'  => $releasedDate,
-                    ]);
-                }
-
-                // CASE 2: Only appointedDate
-                elseif ($appointedDate && !$releasedDate) {
-                    if ($currentAppointment) {
-                        $currentAppointment->releasedDate = $appointedDate;
-                        $currentAppointment->save();
+                    if (!$userServiceId || !$schoolId) {
+                        return back()->with('error', 'Service and School selection required.');
                     }
 
-                    UserServiceAppointment::create([
-                        'userServiceId'  => $userServiceId,
-                        'workPlaceId'       => $workPlaceId,
-                        'appointmentType'=> $appointmentType,
-                        'appointedDate'  => $appointedDate,
-                        'releasedDate'   => null,
-                    ]);
-                }
+                    // Helper function to create appointment + linked position
+                    $createAppointment = function($userServiceId, $workPlaceId, $appointmentType, $appointedDate, $releasedDate) {
+                        $appointment = UserServiceAppointment::create([
+                            'userServiceId'  => $userServiceId,
+                            'workPlaceId'    => $workPlaceId,
+                            'appointmentType'=> $appointmentType,
+                            'appointedDate'  => $appointedDate,
+                            'releasedDate'   => $releasedDate,
+                        ]);
 
-                // CASE 3: Only releasedDate
-                elseif (!$appointedDate && $releasedDate) {
-                    if ($currentAppointment) {
-                        $currentAppointment->releasedDate = $releasedDate;
-                        $currentAppointment->save();
+                        // Create linked position record (positionId = 1)
+                        UserServiceAppointmentPosition::create([
+                            'userServiceAppId' => $appointment->id,
+                            'positionId'       => 1,
+                            'positionedDate'   => $appointedDate,
+                        ]);
+                    };
+
+                    // ----------------------------------
+                    // APPOINTMENT TYPE = 1 (PERMANENT)
+                    // ----------------------------------
+                    if ($appointmentType == 1) {
+
+                        // Case 1: Only appointedDate
+                        if ($appointedDate && !$releasedDate) {
+                            UserServiceAppointment::where('userServiceId', $userServiceId)
+                                ->where('appointmentType', 1)
+                                ->whereNull('releasedDate')
+                                ->update(['releasedDate' => $appointedDate]);
+
+                            $createAppointment($userServiceId, $workPlaceId, 1, $appointedDate, null);
+                        }
+
+                        // Case 2: Only releasedDate
+                        elseif (!$appointedDate && $releasedDate) {
+                            UserServiceAppointment::where('userServiceId', $userServiceId)
+                                ->where('appointmentType', 1)
+                                ->whereNull('releasedDate')
+                                ->update(['releasedDate' => $releasedDate]);
+                        }
+
+                        // Case 3: Both appointedDate & releasedDate
+                        elseif ($appointedDate && $releasedDate) {
+                            $createAppointment($userServiceId, $workPlaceId, 1, $appointedDate, $releasedDate);
+                        }
                     }
-                }
 
-                return redirect()->back()->with('success', 'Service updated successfully!');
+                    // ----------------------------------
+                    // APPOINTMENT TYPE = 2 (ATTACHMENT)
+                    // ----------------------------------
+                    elseif ($appointmentType == 2) {
+
+                        // Case 1: Only appointedDate
+                        if ($appointedDate && !$releasedDate) {
+                            UserServiceAppointment::where('userServiceId', $userServiceId)
+                                ->where('appointmentType', 2)
+                                ->whereNull('releasedDate')
+                                ->update(['releasedDate' => $appointedDate]);
+
+                            $createAppointment($userServiceId, $workPlaceId, 2, $appointedDate, null);
+                        }
+
+                        // Case 2: Only releasedDate
+                        elseif (!$appointedDate && $releasedDate) {
+                            UserServiceAppointment::where('userServiceId', $userServiceId)
+                                ->where('appointmentType', 2)
+                                ->whereNull('releasedDate')
+                                ->update(['releasedDate' => $releasedDate]);
+                        }
+
+                        // Case 3: Both appointedDate & releasedDate
+                        elseif ($appointedDate && $releasedDate) {
+                            $createAppointment($userServiceId, $workPlaceId, 2, $appointedDate, $releasedDate);
+                        }
+                    }
+
+                    return redirect()->back()->with('success', 'Service updated successfully!');
+
 
 
 
                 default:
-                return redirect()->back()->with('error', 'Invalid section!');
+                    return redirect()->back()->with('error', 'Invalid section!');
         }
 
         return redirect()->back()->with('success', 'Section updated successfully!');

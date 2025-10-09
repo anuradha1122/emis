@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('nameWithInitials')->nullable();
             $table->string('nic')->nullable();
-            $table->integer('roleId')->default(0); // 0 = user, 1 = admin
+            $table->integer('roleId')->nullable(); // 0 = user, 1 = admin
             $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

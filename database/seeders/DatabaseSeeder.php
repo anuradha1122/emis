@@ -66,17 +66,17 @@ class DatabaseSeeder extends Seeder
         // $this->call(AppointmentTerminationSeeder::class);
         // $this->call(TransferTypeSeeder::class);
         // $this->call(TransferReasonSeeder::class);
-        // $this->call(UserSeeder::class);
-        // $this->call(UserInServiceSeeder::class);
-        // $this->call(UserServiceAppointmentSeeder::class);
-        // $this->call(UserServiceAppointmentPositionSeeder::class);
-        // $this->call(ContactInfoSeeder::class);
-        // $this->call(PersonalInfoSeeder::class);
+        //$this->call(UserSeeder::class);
+        //$this->call(UserInServiceSeeder::class);
+        //$this->call(UserServiceAppointmentSeeder::class);
+        //$this->call(UserServiceAppointmentPositionSeeder::class);
+        //$this->call(ContactInfoSeeder::class);
+        //$this->call(PersonalInfoSeeder::class);
         // $this->call(ClassListSeeder::class);
         // $this->call(PermissionCategorySeeder::class);
-         $this->call(PermissionSeeder::class);
-        // $this->call(PositionPermissionSeeder::class);
+        $this->call(PermissionSeeder::class);
+        //$this->call(PositionPermissionSeeder::class);
         // $this->call(RoleSeeder::class);
-        // $this->call(RolePermissionSeeder::class);
+        $this->call(RolePermissionSeeder::class);
     }
 }

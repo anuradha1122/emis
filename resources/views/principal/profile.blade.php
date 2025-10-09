@@ -57,7 +57,7 @@
                                         </a>
                                         @endif
 
-                                        {{-- Conditional rendering of the "Change Password" button --}}
+                                        {{-- Add other action buttons if needed --}}
 
                                         {{-- <button
                                             class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800">
@@ -112,7 +112,8 @@
                                             </a>
                                             @endif
 
-                                            {{-- Conditional rendering of the "Change Password" button --}}
+                                            {{-- Add other action buttons if needed --}}
+
                                             {{-- <button
                                                 class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800">
                                                 <i data-lucide="phone-call"></i>
@@ -191,6 +192,7 @@
                                             </a>
                                             @endif
 
+                                            {{-- Add other action buttons if needed --}}
                                             {{-- <button
                                                 class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800">
                                                 <i data-lucide="phone-call"></i>
@@ -319,7 +321,6 @@
                                                 <i data-lucide="edit"></i>
                                             </a>
                                             @endif
-
                                             {{-- <button
                                                 class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800">
                                                 <i data-lucide="phone-call"></i>
@@ -367,7 +368,6 @@
                                                 <i data-lucide="edit"></i>
                                             </a>
                                             @endif
-
                                             {{-- <button
                                                 class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800">
                                                 <i data-lucide="phone-call"></i>
@@ -454,20 +454,18 @@
                         <!-- Divider -->
                         <div class="border-t border-gray-200 dark:border-gray-700"></div>
 
-                        <!-- Profile Details -->
+                        <!-- Principal Service Details -->
                         <div class="p-6">
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
 
                                 </div>
 
-                                <div>
-                                    <h3
-                                        class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
-                                        <i class="fas fa-graduation-cap text-indigo-600 dark:text-indigo-400 mr-2"></i>
-                                        Service Information
-                                        <div class="flex space-x-2">
-                                            @if (Auth::user()->hasPermission('slps_service_edit'))
+                                <div class="mt-8">
+                                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                                        <i class="fas fa-briefcase text-indigo-600 dark:text-indigo-400 mr-2"></i>
+                                        Services
+                                        @if (Auth::user()->hasPermission('slps_rank_edit'))
                                             <a href="{{ route('principal.profileedit', [
                                                     'id' => $principal->cryptedId,
                                                     'section' => 'service-info'
@@ -475,8 +473,7 @@
                                             class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 inline-flex items-center justify-center">
                                                 <i data-lucide="edit"></i>
                                             </a>
-                                            @endif
-                                        </div>
+                                        @endif
                                     </h3>
 
                                     <ul class="space-y-3">
@@ -488,78 +485,38 @@
                                                 </div>
                                                 <div>
                                                     <h4 class="font-medium text-gray-800 dark:text-gray-100">
-                                                        {{ optional($currentService->service)->name ?? 'Not Available' }}
+                                                        Current Service: {{ $currentService->service?->name ?? 'Not Available' }}
                                                     </h4>
-
-                                                    {{-- Current Appointments --}}
-                                                    @forelse($currentAppointments as $app)
-                                                        <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
-                                                            <strong>Current Appointment:</strong>
-                                                            {{ $app['workPlace'] ?? 'Not Available' }} (from {{ $app['appointedDate'] ?? 'N/A' }})
-
-                                                            @if(!empty($app['currentPositions']))
-                                                                <br>
-                                                                <strong>Positions:</strong>
-                                                                @foreach($app['currentPositions'] as $pos)
-                                                                    {{ $pos['positionName'] ?? 'N/A' }} (from {{ $pos['positionedDate'] ?? 'N/A' }})
-                                                                    @if (!$loop->last), @endif
-                                                                @endforeach
-                                                            @endif
-                                                        </p>
-                                                    @empty
-                                                        <p class="text-gray-500 dark:text-gray-400 ml-4">No current appointments available.</p>
-                                                    @endforelse
-
-                                                    {{-- Current Attached Appointments --}}
-                                                    @forelse($currentAttachedAppointments as $app)
-                                                        <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
-                                                            <strong>Attached Appointment:</strong>
-                                                            {{ $app['workPlace'] ?? 'Not Available' }} (from {{ $app['appointedDate'] ?? 'N/A' }})
-                                                        </p>
-                                                    @empty
-                                                        <p class="text-gray-500 dark:text-gray-400 ml-4">.</p>
-                                                    @endforelse
+                                                    <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
+                                                        Started on: {{ $currentService->appointedDate ?? 'Unknown' }}
+                                                    </p>
                                                 </div>
                                             </li>
                                         @else
                                             <li class="text-gray-500 dark:text-gray-400">No current service available.</li>
                                         @endif
 
-                                        {{-- Previous Appointments (under current service) --}}
-                                        @if(!empty($previousAppointments) || !empty($previousAttachedAppointments))
-                                            <li class="flex items-start mt-2">
+                                        {{-- Previous Services --}}
+                                        @forelse($previousServices as $service)
+                                            <li class="flex items-start">
                                                 <div class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full mr-3">
-                                                    <i data-lucide="badge" class="text-indigo-600 dark:text-indigo-300 text-xs"></i>
+                                                    <i data-lucide="clock" class="text-indigo-600 dark:text-indigo-300 text-xs"></i>
                                                 </div>
                                                 <div>
-                                                    <h4 class="font-medium text-gray-800 dark:text-gray-100">Previous Appointments</h4>
-
-                                                    {{-- Previous Appointments --}}
-                                                    @forelse($previousAppointments as $app)
-                                                        <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
-                                                            <strong>Previous Appointment:</strong>
-                                                            {{ $app['workPlace'] ?? 'Not Available' }}
-                                                            (from {{ $app['appointedDate'] ?? 'N/A' }} to {{ $app['releasedDate'] ?? 'Present' }})
-                                                        </p>
-                                                    @empty
-                                                        <p class="text-gray-500 dark:text-gray-400 ml-4">No previous appointments available.</p>
-                                                    @endforelse
-
-                                                    {{-- Previous Attached Appointments --}}
-                                                    @forelse($previousAttachedAppointments as $app)
-                                                        <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
-                                                            <strong>Previous Attached Appointment:</strong>
-                                                            {{ $app['workPlace'] ?? 'Not Available' }}
-                                                            (from {{ $app['appointedDate'] ?? 'N/A' }} to {{ $app['releasedDate'] ?? 'Present' }})
-                                                        </p>
-                                                    @empty
-                                                        <p class="text-gray-500 dark:text-gray-400 ml-4">.</p>
-                                                    @endforelse
+                                                    <h4 class="font-medium text-gray-800 dark:text-gray-100">
+                                                        {{ $service->service?->name ?? 'Unknown Service' }}
+                                                    </h4>
+                                                    <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
+                                                        From {{ $service->appointedDate ?? 'N/A' }} to {{ $service->releasedDate ?? 'Present' }}
+                                                    </p>
                                                 </div>
                                             </li>
-                                        @endif
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No previous services found.</li>
+                                        @endforelse
                                     </ul>
                                 </div>
+
 
 
                             </div>
@@ -568,6 +525,221 @@
                         <!-- Divider -->
                         <div class="border-t border-gray-200 dark:border-gray-700"></div>
 
+                        <!-- Principal Service Details -->
+                        <div class="p-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="mt-8">
+                                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                                        <i class="fas fa-user-tie text-indigo-600 dark:text-indigo-400 mr-2"></i>
+                                        Appointments
+                                        @if (Auth::user()->hasPermission('slps_appointment_edit'))
+                                            <a href="{{ route('principal.profileedit', [
+                                                    'id' => $principal->cryptedId,
+                                                    'section' => 'appointment-info'
+                                                ]) }}"
+                                            class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 inline-flex items-center justify-center">
+                                                <i data-lucide="edit"></i>
+                                            </a>
+                                        @endif
+                                    </h3>
+
+                                    <ul class="space-y-3">
+                                        {{-- Current Appointments --}}
+                                        @forelse($currentAppointments as $app)
+                                            <li class="flex items-start">
+                                                <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full mr-3">
+                                                    <i data-lucide="check" class="text-green-600 dark:text-green-300 text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-medium text-gray-800 dark:text-gray-100">
+                                                        {{ $app['workPlace'] ?? 'Unknown Workplace' }}
+                                                    </h4>
+                                                    <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
+                                                        From {{ $app['appointedDate'] ?? 'N/A' }}
+                                                    </p>
+                                                </div>
+                                            </li>
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No current appointments available.</li>
+                                        @endforelse
+
+                                        {{-- Previous Appointments --}}
+                                        @forelse($previousAppointments as $app)
+                                            <li class="flex items-start">
+                                                <div class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full mr-3">
+                                                    <i data-lucide="clock" class="text-indigo-600 dark:text-indigo-300 text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-medium text-gray-800 dark:text-gray-100">
+                                                        {{ $app['workPlace'] ?? 'Unknown Workplace' }}
+                                                    </h4>
+                                                    <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
+                                                        From {{ $app['appointedDate'] ?? 'N/A' }} to {{ $app['releasedDate'] ?? 'Present' }}
+                                                    </p>
+                                                </div>
+                                            </li>
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No previous appointments available.</li>
+                                        @endforelse
+
+                                        {{-- Current Appointments --}}
+                                        @forelse($currentAttachedAppointments as $app)
+                                            <li class="flex items-start">
+                                                <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full mr-3">
+                                                    <i data-lucide="check" class="text-green-600 dark:text-green-300 text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-medium text-gray-800 dark:text-gray-100">
+                                                        {{ $app['workPlace']."(Attached)" ?? 'Unknown Workplace' }}
+                                                    </h4>
+                                                    <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
+                                                        From {{ $app['appointedDate'] ?? 'N/A' }}
+                                                    </p>
+                                                </div>
+                                            </li>
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No current Attached appointments available.</li>
+                                        @endforelse
+
+                                        {{-- Previous Appointments --}}
+                                        @forelse($previousAttachedAppointments as $app)
+                                            <li class="flex items-start">
+                                                <div class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full mr-3">
+                                                    <i data-lucide="clock" class="text-indigo-600 dark:text-indigo-300 text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-medium text-gray-800 dark:text-gray-100">
+                                                        {{ $app['workPlace']."(Attached)" ?? 'Unknown Workplace' }}
+                                                    </h4>
+                                                    <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
+                                                        From {{ $app['appointedDate'] ?? 'N/A' }} to {{ $app['releasedDate'] ?? 'Present' }}
+                                                    </p>
+                                                </div>
+                                            </li>
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No previous Attached appointments available.</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
+                                <div class="mt-8">
+                                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                                        <i class="fas fa-id-badge text-indigo-600 dark:text-indigo-400 mr-2"></i>
+                                        Positions
+                                        @if (Auth::user()->hasPermission('slps_position_edit'))
+                                            <a href="{{ route('principal.profileedit', [
+                                                    'id' => $principal->cryptedId,
+                                                    'section' => 'position-info'
+                                                ]) }}"
+                                            class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 inline-flex items-center justify-center ml-2">
+                                                <i data-lucide="edit"></i>
+                                            </a>
+                                        @endif
+                                    </h3>
+                                    <ul>
+                                        @forelse($currentAppointments as $app)
+                                            @if(!empty($app['currentPositions']))
+                                                @foreach($app['currentPositions'] as $pos)
+                                                    <li class="flex items-start mb-3">
+                                                        <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full mr-3">
+                                                            <i data-lucide="check" class="text-green-600 dark:text-green-300 text-xs"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
+                                                                {{ $pos['positionName'] ?? 'Unknown Position' }}
+                                                            </h4>
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @endif
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No current positions available.</li>
+                                        @endforelse
+                                    </ul>
+                                    <ul>
+                                        @forelse($previousAppointments as $app)
+                                            @if(!empty($app['positions']))
+                                                @foreach($app['positions'] as $pos)
+                                                    <li class="flex items-start mb-3">
+                                                        <div class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-full mr-3">
+                                                            <i data-lucide="clock" class="text-yellow-600 dark:text-yellow-300 text-xs"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
+                                                                {{ $pos['positionName'] ?? 'Unknown Position' }}
+                                                            </h4>
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}<br>
+                                                                Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @endif
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No previous positions available.</li>
+                                        @endforelse
+                                    </ul>
+                                    <ul>
+                                        @forelse($currentAttachedAppointments as $app)
+                                            @if(!empty($app['positions']))
+                                                @foreach($app['positions'] as $pos)
+                                                    <li class="flex items-start mb-3">
+                                                        <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
+                                                            <i data-lucide="link" class="text-blue-600 dark:text-blue-300 text-xs"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
+                                                                {{ $pos['positionName'] ?? 'Unknown Position' }}
+                                                            </h4>
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @endif
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No current attached positions available.</li>
+                                        @endforelse
+                                    </ul>
+                                    <ul>
+                                        @forelse($previousAttachedAppointments as $app)
+                                            @if(!empty($app['positions']))
+                                                @foreach($app['positions'] as $pos)
+                                                    <li class="flex items-start mb-3">
+                                                        <div class="bg-red-100 dark:bg-red-900 p-2 rounded-full mr-3">
+                                                            <i data-lucide="unlink" class="text-red-600 dark:text-red-300 text-xs"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
+                                                                {{ $pos['positionName'] ?? 'Unknown Position' }}
+                                                            </h4>
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}<br>
+                                                                Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @endif
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No previous attached positions available.</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- Divider -->
+                        <div class="border-t border-gray-200 dark:border-gray-700"></div>
                     </div>
                 </div>
             </main>

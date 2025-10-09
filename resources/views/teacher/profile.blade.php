@@ -593,7 +593,7 @@
                                     <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
                                         <i class="fas fa-user-tie text-indigo-600 dark:text-indigo-400 mr-2"></i>
                                         Appointments
-                                        @if (Auth::user()->hasPermission('slts_rank_edit'))
+                                        @if (Auth::user()->hasPermission('slts_appointment_edit'))
                                             <a href="{{ route('teacher.profileedit', [
                                                     'id' => $teacher->cryptedId,
                                                     'section' => 'appointment-info'
@@ -682,38 +682,35 @@
                                         @endforelse
                                     </ul>
                                 </div>
-
-
                                 <div class="mt-8">
                                     <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
                                         <i class="fas fa-id-badge text-indigo-600 dark:text-indigo-400 mr-2"></i>
                                         Positions
-                                        @if (Auth::user()->hasPermission('slts_rank_edit'))
+                                        @if (Auth::user()->hasPermission('slts_position_edit'))
                                             <a href="{{ route('teacher.profileedit', [
                                                     'id' => $teacher->cryptedId,
-                                                    'section' => 'rank-info'
+                                                    'section' => 'position-info'
                                                 ]) }}"
-                                            class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 inline-flex items-center justify-center">
+                                            class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 inline-flex items-center justify-center ml-2">
                                                 <i data-lucide="edit"></i>
                                             </a>
                                         @endif
                                     </h3>
-
-                                    <ul class="space-y-3">
-                                        {{-- Current Positions --}}
+                                    <ul>
                                         @forelse($currentAppointments as $app)
                                             @if(!empty($app['currentPositions']))
                                                 @foreach($app['currentPositions'] as $pos)
-                                                    <li class="flex items-start">
+                                                    <li class="flex items-start mb-3">
                                                         <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full mr-3">
                                                             <i data-lucide="check" class="text-green-600 dark:text-green-300 text-xs"></i>
                                                         </div>
                                                         <div>
-                                                            <h4 class="font-medium text-gray-800 dark:text-gray-100">
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
                                                                 {{ $pos['positionName'] ?? 'Unknown Position' }}
                                                             </h4>
-                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
-                                                                From {{ $pos['positionedDate'] ?? 'N/A' }}
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}
                                                             </p>
                                                         </div>
                                                     </li>
@@ -722,27 +719,83 @@
                                         @empty
                                             <li class="text-gray-500 dark:text-gray-400">No current positions available.</li>
                                         @endforelse
-
-                                        {{-- Previous Positions --}}
+                                    </ul>
+                                    <ul>
                                         @forelse($previousAppointments as $app)
-                                            <li class="flex items-start">
-                                                <div class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full mr-3">
-                                                    <i data-lucide="clock" class="text-indigo-600 dark:text-indigo-300 text-xs"></i>
-                                                </div>
-                                                <div>
-                                                    <h4 class="font-medium text-gray-800 dark:text-gray-100">
-                                                        {{ $app['workPlace'] ?? 'Unknown Workplace' }}
-                                                    </h4>
-                                                    <p class="text-gray-600 dark:text-gray-400 text-sm ml-4">
-                                                        From {{ $app['appointedDate'] ?? 'N/A' }} to {{ $app['releasedDate'] ?? 'Present' }}
-                                                    </p>
-                                                </div>
-                                            </li>
+                                            @if(!empty($app['positions']))
+                                                @foreach($app['positions'] as $pos)
+                                                    <li class="flex items-start mb-3">
+                                                        <div class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-full mr-3">
+                                                            <i data-lucide="clock" class="text-yellow-600 dark:text-yellow-300 text-xs"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
+                                                                {{ $pos['positionName'] ?? 'Unknown Position' }}
+                                                            </h4>
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}<br>
+                                                                Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @endif
                                         @empty
                                             <li class="text-gray-500 dark:text-gray-400">No previous positions available.</li>
                                         @endforelse
                                     </ul>
+                                    <ul>
+                                        @forelse($currentAttachedAppointments as $app)
+                                            @if(!empty($app['positions']))
+                                                @foreach($app['positions'] as $pos)
+                                                    <li class="flex items-start mb-3">
+                                                        <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
+                                                            <i data-lucide="link" class="text-blue-600 dark:text-blue-300 text-xs"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
+                                                                {{ $pos['positionName'] ?? 'Unknown Position' }}
+                                                            </h4>
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @endif
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No current attached positions available.</li>
+                                        @endforelse
+                                    </ul>
+                                    <ul>
+                                        @forelse($previousAttachedAppointments as $app)
+                                            @if(!empty($app['positions']))
+                                                @foreach($app['positions'] as $pos)
+                                                    <li class="flex items-start mb-3">
+                                                        <div class="bg-red-100 dark:bg-red-900 p-2 rounded-full mr-3">
+                                                            <i data-lucide="unlink" class="text-red-600 dark:text-red-300 text-xs"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-lg text-gray-800 dark:text-gray-100">
+                                                                {{ $pos['positionName'] ?? 'Unknown Position' }}
+                                                            </h4>
+                                                            <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
+                                                                Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
+                                                                Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}<br>
+                                                                Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @endif
+                                        @empty
+                                            <li class="text-gray-500 dark:text-gray-400">No previous attached positions available.</li>
+                                        @endforelse
+                                    </ul>
                                 </div>
+
 
                             </div>
                         </div>
