@@ -594,8 +594,6 @@
                         @endif
                     @endif
 
-
-
                     @if($section === 'appointment-info')
                         <form action="{{ route('teacher.profileupdate', ['id' => $encryptedId]) }}" method="POST">
                             @csrf
@@ -796,6 +794,20 @@
                                 </table>
                             </div>
                         @endif
+                    @endif
+
+                    @if($section === 'login-info')
+                        <form action="{{ route('teacher.profileupdate', ['id' => $encryptedId]) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="id" value="{{ $decryptedId }}">
+                            <input type="hidden" name="section" value="login-info">
+
+                            <div class="grid sm:grid-cols-3 gap-4 mt-4">
+                                <p class="text-gray-600 dark:text-gray-300">Current Username: <span class="font-semibold">{{ $teacher->nic }}. Click the reset button to reset password</span></p>
+                            </div>
+
+                            <x-form-button-primary size="" text="Reset Password" modelBinding="" />
+                        </form>
                     @endif
 
                 </div>

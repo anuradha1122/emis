@@ -802,6 +802,59 @@
                         </div>
                         <!-- Divider -->
                         <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+                        <!-- Divider -->
+                        <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+                        <!-- Profile Details -->
+                        <div class="p-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <!-- Personal Info -->
+                                <div>
+                                    <h3
+                                        class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                                        <i class="fas fa-graduation-cap text-indigo-600 dark:text-indigo-400 mr-2"></i>
+                                        Login Info
+                                        <div class="flex space-x-2">
+                                            @if (Auth::user()->hasPermission('slts_personal_info_edit'))
+                                            <a href="{{ route('teacher.profileedit', [
+                                                    'id' => $teacher->cryptedId,
+                                                    'section' => 'login-info'
+                                                ]) }}"
+                                            class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 inline-flex items-center justify-center">
+                                                <i data-lucide="edit"></i>
+                                            </a>
+                                            @endif
+
+                                            {{-- Add other action buttons if needed --}}
+
+                                            {{-- <button
+                                                class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800">
+                                                <i data-lucide="phone-call"></i>
+                                            </button> --}}
+                                        </div>
+                                    </h3>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full mr-3">
+                                                <i data-lucide="graduation-cap"
+                                                    class="text-indigo-600 dark:text-indigo-300 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-800 dark:text-gray-100">NIC</h4>
+                                                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ $teacher->nic }}</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                </div>
+
+                                <!-- Location Info -->
+                                <div>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>

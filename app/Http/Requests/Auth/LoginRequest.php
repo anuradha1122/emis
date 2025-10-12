@@ -24,15 +24,15 @@ class LoginRequest extends FormRequest
         ];
     }
 
+
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
-        // attempt using NIC and check active = 1
-        if (! Auth::attempt(
-            $this->only('nic', 'password') + ['active' => 1],
-            $this->boolean('remember')
-        )) {
+        $credentials = $this->only('nic', 'password');
+
+        // attempt using NIC and active = 1
+        if (! Auth::attempt($credentials + ['active' => 1], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -41,7 +41,39 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // ✅ After successful authentication, check if password == first 6 of NIC
+        $user = Auth::user();
+
+        if ($user && isset($user->nic)) {
+            $defaultPassword = substr($user->nic, 0, 6);
+
+            // Since we don't store plain passwords, check with attempt()
+            if ($this->input('password') === $defaultPassword) {
+                // Mark session to force password reset
+                session(['force_password_reset' => true]);
+            }
+        }
     }
+
+    // public function authenticate(): void
+    // {
+    //     $this->ensureIsNotRateLimited();
+
+    //     // attempt using NIC and check active = 1
+    //     if (! Auth::attempt(
+    //         $this->only('nic', 'password') + ['active' => 1],
+    //         $this->boolean('remember')
+    //     )) {
+    //         RateLimiter::hit($this->throttleKey());
+
+    //         throw ValidationException::withMessages([
+    //             'nic' => trans('auth.failed'),
+    //         ]);
+    //     }
+
+    //     RateLimiter::clear($this->throttleKey());
+    // }
 
     public function ensureIsNotRateLimited(): void
     {

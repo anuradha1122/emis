@@ -742,6 +742,7 @@ class TeacherController extends Controller
                 break;
 
             case 'personal-info':
+
                 $personalInfo = $teacher->personalInfo ?? new PersonalInfo(['userId' => $teacher->id]);
 
                 if ($request->filled('race')) {
@@ -1313,6 +1314,26 @@ class TeacherController extends Controller
 
                 break;
 
+            case 'login-info':
+                $teacherUser = $teacher ?? null;
+
+                if (!$teacherUser) {
+                    return back()->with('error', 'User account not found for this teacher.');
+                }
+
+                $nic = $teacher->nic ?? null;
+
+                if (!$nic || strlen($nic) < 6) {
+                    return back()->with('error', 'Invalid NIC for password reset.');
+                }
+
+                // ✅ Reset password to first 6 digits of NIC
+                $newPassword = substr($nic, 0, 6);
+
+                $teacherUser->password = Hash::make($newPassword);
+                $teacherUser->save();
+
+                return back()->with('success', "Password has been reset to the first 6 digits of NIC.");
 
 
 

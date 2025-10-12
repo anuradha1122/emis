@@ -41,4 +41,28 @@ class PasswordResetLinkController extends Controller
                     : back()->withInput($request->only('email'))
                         ->withErrors(['email' => __($status)]);
     }
+
+
+    public function showForceResetForm()
+    {
+        return view('auth.force-reset');
+    }
+
+    public function sendForceResetLink(Request $request)
+    {
+        $request->validate(['nic' => 'required|string']);
+
+        $user = \App\Models\User::where('nic', $request->nic)->first();
+
+        if (!$user) {
+            return back()->withErrors(['nic' => 'No account found with this NIC.']);
+        }
+
+        // Send password reset link using user's email
+        $status = Password::sendResetLink(['email' => $user->email]);
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['nic' => __($status)]);
+    }
 }
