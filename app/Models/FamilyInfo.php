@@ -15,7 +15,7 @@ class FamilyInfo extends Model
         'memberType',
         'nic',
         'name',
-        'school',
+        'schoolId',
         'profession',
         'active',
     ];
@@ -24,4 +24,10 @@ class FamilyInfo extends Model
     {
         return $this->belongsTo(FamilyMemberType::class, 'memberType', 'id');
     }
+
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(School::class, 'schoolId', 'id');
+    }
+
 }

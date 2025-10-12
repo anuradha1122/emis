@@ -380,7 +380,8 @@
                                             <strong>{{ $member['relation'] }}</strong><br>
                                             Name: {{ $member['name'] ?? 'N/A' }}<br>
                                             NIC: {{ $member['nic'] ?? 'N/A' }}<br>
-                                            Profession: {{ $member['profession'] ?? 'N/A' }}
+                                            Profession: {{ $member['profession'] ?? 'N/A' }}<br>
+                                            School: {{ $member['school'] ?? 'N/A' }}<br>
                                         </div>
                                     @empty
                                         <p>No family information available.</p>
@@ -466,7 +467,7 @@
                                             @if (Auth::user()->hasPermission('slts_personal_info_edit'))
                                             <a href="{{ route('teacher.profileedit', [
                                                     'id' => $teacher->cryptedId,
-                                                    'section' => 'personal-info'
+                                                    'section' => 'teacher-info'
                                                 ]) }}"
                                             class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 p-2 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 inline-flex items-center justify-center">
                                                 <i data-lucide="edit"></i>
@@ -735,7 +736,7 @@
                                                             <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
                                                                 Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
                                                                 Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}<br>
-                                                                Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }}
+                                                                {{-- Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }} --}}
                                                             </p>
                                                         </div>
                                                     </li>
@@ -784,7 +785,7 @@
                                                             <p class="text-gray-600 dark:text-gray-400 text-sm ml-1">
                                                                 Workplace: {{ $app['workPlace'] ?? 'Unknown' }}<br>
                                                                 Positioned Date: {{ $pos['positionedDate'] ?? 'N/A' }}<br>
-                                                                Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }}
+                                                                {{-- Released Date: {{ $pos['releasedDate'] ?? $app['releasedDate'] ?? 'N/A' }} --}}
                                                             </p>
                                                         </div>
                                                     </li>

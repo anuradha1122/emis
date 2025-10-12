@@ -47,6 +47,7 @@ use App\Models\SchoolFacility;
 use App\Models\SchoolGender;
 use App\Models\SchoolLanguage;
 use App\Models\AppointmentTermination;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use App\Services\UserDashboardService;
 use Mpdf\Mpdf;
@@ -364,9 +365,10 @@ class TeacherController extends Controller
                 'educationQualificationInfos.educationQualification',
                 'professionalQualificationInfos.professionalQualification',
                 'familyInfos.memberTypeRelation',
+                'familyInfos.school.workPlace',
             ])
             ->find($decryptedId);
-
+        //dd($teacher->familyInfos?->school);
         //dd($teacher);
         if (!$teacher) {
             abort(404, 'Teacher not found');
@@ -455,7 +457,6 @@ class TeacherController extends Controller
                 'workPlace' => optional($app->workPlace)->name,
                 'appointedDate' => $app->appointedDate,
                 'currentPositions' => $app->positions
-                    ->where('current', 1)
                     ->where('active', 1)
                     ->map(fn($pos) => [
                         'id' => $pos->id,
@@ -480,6 +481,7 @@ class TeacherController extends Controller
                 'appointedDate' => $app->appointedDate,
                 'releasedDate' => $app->releasedDate,
                 'positions' => $app->positions
+                    ->where('active', 1)
                     ->map(fn($pos) => [
                         'id' => $pos->id,
                         'positionName' => optional($pos->position)->name,
@@ -504,7 +506,6 @@ class TeacherController extends Controller
                 'workPlace' => optional($app->workPlace)->name,
                 'appointedDate' => $app->appointedDate,
                 'positions' => $app->positions
-                    ->where('current', 1)
                     ->where('active', 1)
                     ->map(fn($pos) => [
                         'id' => $pos->id,
@@ -529,6 +530,7 @@ class TeacherController extends Controller
                 'appointedDate' => $app->appointedDate,
                 'releasedDate' => $app->releasedDate,
                 'positions' => $app->positions
+                    ->where('active', 1)
                     ->map(fn($pos) => [
                         'id' => $pos->id,
                         'positionName' => optional($pos->position)->name,
@@ -559,8 +561,11 @@ class TeacherController extends Controller
                 'name'       => $member->name,
                 'nic'        => $member->nic,
                 'profession' => $member->profession,
+                'school'     => optional($member->school?->workPlace)?->name,
             ];
         });
+
+        //dd($family);
 
 
         // ---------- Return to Blade ----------
@@ -600,14 +605,20 @@ class TeacherController extends Controller
             (object)['id' => 2, 'name' => 'Female']
         ]);
 
+        $subjectLists = Subject::where('active', 1)->get(['id', 'name']);
+        $appointmentMediums = AppointmentMedium::where('active', 1)->get(['id', 'name']);
+        $appointmentCategories = AppointmentCategory::where('active', 1)->get(['id', 'name']);
+
         // Ranks related to teacher's current service
         $teacher = User::with([
             'personalInfo',
             'contactInfo',
             'locationInfo',
-            'currentTeacherService.serviceInRanks.rank' // load related rank names
+            'currentTeacherService.serviceInRanks.rank', // load related rank names
+            'currentTeacherService.teacherService',
         ])->findOrFail($decryptedId);
 
+        //dd($teacher);
         // Get the current teacher service (serviceId = 1)
         $userService = $teacher->currentTeacherService()
         ->with(['serviceInRanks' => function($query) {
@@ -633,13 +644,24 @@ class TeacherController extends Controller
                 ->orderBy('appointedDate', 'desc')
                 ->get()
             : collect(); // empty collection if no service found
-
+        //dd($appointments);
         $positions = Position::where('active', 1)->get(['id', 'name']);
 
+        $existingPositions = UserServiceAppointmentPosition::where('active', 1)
+        ->whereHas('appointment.userInService', function ($q) use ($decryptedId) {
+            $q->where('userId', $decryptedId);
+        })
+        ->with(['appointment.workPlace', 'position'])
+        ->orderBy('positionedDate', 'desc')
+        ->get();
+
+
+        //dd($userPositions);
         //dd($positions);
 
         $familyMemberTypes = FamilyMemberType::where('active', 1)->get(['id', 'name']);
-
+        $familyInfos = $teacher->familyInfos()->where('active', 1)->get(['id', 'name']);
+        //dd($familyInfos);
 
         $ranks = Rank::where('serviceId', 1)->where('active', 1)->get(['id', 'name']);
 
@@ -665,14 +687,19 @@ class TeacherController extends Controller
             'religions',
             'civilStatuses',
             'genders',
+            'subjectLists',
+            'appointmentMediums',
+            'appointmentCategories',
             'ranks',
             'services',
             'userService',
             'allUserServices',
             'appointments',
             'positions',
+            'existingPositions',
             'appointmentTypes',
             'familyMemberTypes',
+            'familyInfos',
             'educationQualifications',
             'professionalQualifications'
         ));
@@ -737,145 +764,176 @@ class TeacherController extends Controller
                 break;
 
             case 'location-info':
+                // Get existing or create a new location record for the teacher
                 $locationInfo = $teacher->locationInfo ?? new LocationInfo(['userId' => $teacher->id]);
 
+                $updated = false;
+
+                // 🔹 Update only if fields are provided
                 if ($request->filled('eduDivision')) {
                     $locationInfo->educationDivisionId = $request->eduDivision;
+                    $updated = true;
                 }
 
                 if ($request->filled('gnDivision')) {
                     $locationInfo->gnDivisionId = $request->gnDivision;
+                    $updated = true;
                 }
 
-                if ($locationInfo->isDirty(['educationDivisionId', 'gnDivisionId'])) {
+                // 🔹 Save if at least one field was provided
+                if ($updated) {
                     $locationInfo->save();
+                    return redirect()->back()->with('success', 'Location information updated successfully!');
                 }
-                break;
+
+                // 🔹 No data provided
+                return redirect()->back()->with('warning', 'No location data provided.');
+
 
             case 'rank-info':
                 $userService = $teacher->currentTeacherService()->first();
-                //dd($userService);
                 if (!$userService) {
                     return redirect()->back()->with('error', 'No active teacher service found!');
                 }
 
-                // Delete rank
-                if ($request->filled('deleteRank') && $request->deleteRank) {
+                $action = $request->input('form_action');
+
+                // 🔹 DELETE rank
+                if ($action === 'delete') {
                     if ($request->filled('rankId')) {
-                        $rankRow = $userService->serviceInRanks()->where('rankId', $request->rankId)->first();
+                        $rankRow = $userService->serviceInRanks()
+                            ->where('rankId', $request->rankId)
+                            ->where('active', 1)
+                            ->first();
+
                         if ($rankRow) {
-                            $rankRow->update(['active' => 0]); // Only update active
+                            $rankRow->update(['active' => 0]);
+                            return redirect()->back()->with('success', 'Rank deleted successfully!');
                         }
+
+                        return redirect()->back()->with('error', 'Rank not found!');
                     }
-                    return redirect()->back()->with('success', 'Rank deleted successfully!');
+
+                    return redirect()->back()->with('error', 'No rank selected to delete!');
                 }
 
-                // Create or update rank
-                if ($request->filled('rankId') && $request->filled('rankedDate')) {
+                // 🔹 SAVE rank
+                if ($action === 'save') {
+                    if ($request->filled('rankId') && $request->filled('rankedDate')) {
+                        // If new current rank added, reset previous ones (optional)
+                        if ($request->boolean('current')) {
+                            $userService->serviceInRanks()->update(['current' => 0]);
+                        }
 
-                    // If "current" checked, reset other ranks
-                    if ($request->filled('current') && $request->current) {
-                        $userService->serviceInRanks()->update(['current' => 0]);
+                        $rankRow = $userService->serviceInRanks()
+                            ->where('rankId', $request->rankId)
+                            ->first();
+
+                        $data = [
+                            'rankedDate' => $request->rankedDate,
+                            'current'    => $request->boolean('current'),
+                            'active'     => 1,
+                        ];
+
+                        if ($rankRow) {
+                            $rankRow->update($data);
+                        } else {
+                            $userService->serviceInRanks()->create(array_merge(['rankId' => $request->rankId], $data));
+                        }
+
+                        return redirect()->back()->with('success', 'Rank saved successfully!');
                     }
 
-                    $rankRow = $userService->serviceInRanks()->where('rankId', $request->rankId)->first();
-
-                    $data = [
-                        'current' => $request->filled('current') && $request->current ? 1 : 0,
-                        'active' => 1,
-                    ];
-
-                    if ($request->filled('rankedDate')) {
-                        $data['rankedDate'] = $request->rankedDate;
-                    }
-
-                    if ($rankRow) {
-                        $rankRow->update($data);
-                    } else {
-                        $userService->serviceInRanks()->create(array_merge(['rankId' => $request->rankId], $data));
-                    }
+                    return redirect()->back()->with('error', 'Rank or ranked date missing!');
                 }
 
-                return redirect()->back()->with('success', 'Rank saved successfully!');
+                break;
+
+
 
             case 'family-info':
-                    $userService = $teacher->currentTeacherService()->first();
-                    //dd($userService);
-                    if (!$userService) {
-                        return redirect()->back()->with('error', 'No active teacher service found!');
-                    }
+                $userService = $teacher->currentTeacherService()->first();
+                if (!$userService) {
+                    return redirect()->back()->with('error', 'No active teacher service found!');
+                }
 
-                    $familyData = $request->input('family', []);
-                    //dd($familyData);
-                    foreach ($familyData as $key => $data) {
-                        // Handle delete for existing members
-                        if (isset($data['delete']) && $data['delete'] && isset($data['id'])) {
-                            $familyRow = FamilyInfo::where('id', $data['id'])
-                                                   ->where('userId', $teacher->id)
-                                                   ->first();
-                            if ($familyRow) {
-                                $familyRow->active = 0;
-                                $familyRow->save();
-                            }
-                            continue;
-                        }
+                // 🔹 DELETE FAMILY MEMBER
+                if ($request->input('form_action') === 'delete') {
+                    $familyId = $request->input('family_id');
+                    if ($familyId) {
+                        $familyRow = FamilyInfo::where('id', $familyId)
+                                                ->where('userId', $teacher->id)
+                                                ->where('active', 1)
+                                                ->first();
+                        if ($familyRow) {
+                            $familyRow->active = 0; // soft delete
+                            $familyRow->save();
 
-                        // Add new member only if memberType and name are filled
-                        if (!isset($data['id']) && !empty($data['memberType']) && !empty($data['name'])) {
-                            FamilyInfo::create([
-                                'userId'     => $teacher->id,
-                                'memberTypeId' => $data['memberType'],
-                                'name'       => $data['name'],
-                                'nic'        => $data['nic'] ?? null,
-                                'profession' => $data['profession'] ?? null,
-                                'active'     => 1,
-                            ]);
+                            return redirect()->back()->with('success', 'Family member deleted successfully!');
                         }
                     }
+                    return redirect()->back()->with('error', 'Family member not found!');
+                }
 
-                    return redirect()->back()->with('success', 'Family information updated successfully!');
+                // 🔹 ADD NEW FAMILY MEMBER
+                $familyData = $request->input('family.new', []);
+                $schoolId = $request->input('school', null);
+
+                if (!empty($familyData) && !empty($familyData['memberType']) && !empty($familyData['name'])) {
+                    FamilyInfo::create([
+                        'userId'       => $teacher->id,
+                        'memberTypeId' => $familyData['memberType'],
+                        'name'         => $familyData['name'],
+                        'nic'          => $familyData['nic'] ?? null,
+                        'profession'   => $familyData['profession'] ?? null,
+                        'schoolId'     => $schoolId ?? null,
+                        'active'       => 1,
+                    ]);
+
+                    return redirect()->back()->with('success', 'Family member added successfully!');
+                }
+
+                return redirect()->back()->with('error', 'Family information not updated!');
+
 
             case 'education-info':
                 $teacher = User::with('educationQualificationInfos')->findOrFail($teacher->id);
-
-                $eduData = $request->input('education', []); // form sends education data as 'education'
+                $eduData = $request->input('education', []);
 
                 foreach ($eduData as $key => $data) {
 
-                    // Soft delete existing qualification
+                    // 🔹 Handle delete
                     if (isset($data['delete']) && $data['delete'] && isset($data['id'])) {
                         $eduRow = EducationQualificationInfo::where('id', $data['id'])
                                     ->where('userId', $teacher->id)
                                     ->first();
                         if ($eduRow) {
-                            $eduRow->active = 0;
+                            $eduRow->active = 0; // Soft delete
                             $eduRow->save();
                         }
                         continue;
                     }
 
-                    // Skip if required fields are missing
+                    // 🔹 Skip if required fields missing
                     if (empty($data['educationQualificationId']) || empty($data['effectiveDate'])) {
                         continue;
                     }
 
-                    // Check if this qualification already exists (active = 1)
+                    // 🔹 Update or create new
                     $eduRow = EducationQualificationInfo::where('userId', $teacher->id)
                                 ->where('eduQualiId', $data['educationQualificationId'])
                                 ->where('active', 1)
                                 ->first();
 
                     if ($eduRow) {
-                        // Update effective date
                         $eduRow->effectiveDate = $data['effectiveDate'];
                         $eduRow->save();
                     } else {
-                        // Create new
                         EducationQualificationInfo::create([
-                            'userId'                   => $teacher->id,
-                            'eduQualiId' => $data['educationQualificationId'],
-                            'effectiveDate'            => $data['effectiveDate'],
-                            'active'                   => 1,
+                            'userId'        => $teacher->id,
+                            'eduQualiId'    => $data['educationQualificationId'],
+                            'effectiveDate' => $data['effectiveDate'],
+                            'active'        => 1,
                         ]);
                     }
                 }
@@ -883,54 +941,123 @@ class TeacherController extends Controller
                 return redirect()->back()->with('success', 'Education qualification info updated successfully!');
 
             case 'professional-info':
-                    $teacher = User::with('professionalQualificationInfos')->findOrFail($teacher->id);
+                $teacher = User::with('professionalQualificationInfos')->findOrFail($teacher->id);
 
-                    $profData = $request->input('professional', []); // form sends professional data as 'professional'
-                    //dd($profData);
-                    foreach ($profData as $key => $data) {
+                $profData = $request->input('professional', []);
 
-                        // Soft delete existing qualification
-                        if (isset($data['delete']) && $data['delete'] && isset($data['id'])) {
-                            $profRow = ProfessionalQualificationInfo::where('id', $data['id'])
-                                        ->where('userId', $teacher->id)
-                                        ->first();
-                            if ($profRow) {
-                                $profRow->active = 0;
-                                $profRow->save();
-                            }
-                            continue;
-                        }
+                foreach ($profData as $key => $data) {
 
-                        // Skip if required fields are missing
-                        if (empty($data['professionalQualificationId']) || empty($data['effectiveDate'])) {
-                            continue;
-                        }
-
-                        // Check if this qualification already exists (active = 1)
-                        $profRow = ProfessionalQualificationInfo::where('userId', $teacher->id)
-                                    ->where('profQualiId', $data['professionalQualificationId'])
-                                    ->where('active', 1)
+                    // 🔹 Handle soft delete
+                    if (isset($data['delete']) && $data['delete'] && isset($data['id'])) {
+                        $profRow = ProfessionalQualificationInfo::where('id', $data['id'])
+                                    ->where('userId', $teacher->id)
                                     ->first();
-
                         if ($profRow) {
-                            // Update effective date
-                            $profRow->effectiveDate = $data['effectiveDate'];
+                            $profRow->active = 0;
                             $profRow->save();
-                        } else {
-                            // Create new
-                            ProfessionalQualificationInfo::create([
-                                'userId'                     => $teacher->id,
-                                'profQualiId' =>            $data['professionalQualificationId'],
-                                'effectiveDate'              => $data['effectiveDate'],
-                                'active'                     => 1,
-                            ]);
                         }
+                        continue;
                     }
 
-                    return redirect()->back()->with('success', 'Professional qualification info updated successfully!');
+                    // 🔹 Skip if required fields are missing
+                    if (empty($data['professionalQualificationId']) || empty($data['effectiveDate'])) {
+                        continue;
+                    }
+
+                    // 🔹 Check if this qualification already exists (active)
+                    $profRow = ProfessionalQualificationInfo::where('userId', $teacher->id)
+                                ->where('profQualiId', $data['professionalQualificationId'])
+                                ->where('active', 1)
+                                ->first();
+
+                    if ($profRow) {
+                        // Update effective date
+                        $profRow->effectiveDate = $data['effectiveDate'];
+                        $profRow->save();
+                    } else {
+                        // Create new qualification
+                        ProfessionalQualificationInfo::create([
+                            'userId'        => $teacher->id,
+                            'profQualiId'   => $data['professionalQualificationId'],
+                            'effectiveDate' => $data['effectiveDate'],
+                            'active'        => 1,
+                        ]);
+                    }
+                }
+
+                return redirect()->back()->with('success', 'Professional qualification info updated successfully!');
+
+            case 'teacher-info':
+
+                //dd('teacher info update');
+                // 🔹 Get the active UserService for this teacher
+                $userService = $teacher->currentTeacherService()->first();
+
+                if (!$userService) {
+                    return redirect()->back()->with('error', 'No active teacher service found!');
+                }
+
+                // 🔹 Validate incoming data
+                $validated = $request->validate([
+                    'appointment_subject' => 'nullable|exists:subjects,id',
+                    'main_subject'        => 'nullable|exists:subjects,id',
+                    'medium'              => 'nullable|exists:appointment_media,id',
+                    'category'            => 'nullable|exists:appointment_categories,id',
+                ]);
+
+                // 🔹 Prepare data for insert/update
+                $data = [
+                    'userServiceId'         => $userService->id,
+                    'appointmentSubjectId'  => $request->appointment_subject,
+                    'mainSubjectId'         => $request->main_subject,
+                    'appointmentMediumId'   => $request->medium,
+                    'appointmentCategoryId' => $request->category,
+                ];
+
+                // 🔹 Fetch existing teacher_service records for this userService
+                $teacherServices = $userService->teacherService()->get(); // assuming hasMany relationship
+
+                if ($teacherServices->count() === 0) {
+                    // ✅ Create new record if none exists
+                    $userService->teacherService()->create($data);
+                    return redirect()->back()->with('success', 'Teacher information created successfully!');
+                }
+
+                if ($teacherServices->count() === 1) {
+                    // ✅ Update the existing record
+                    $teacherService = $teacherServices->first();
+                    $teacherService->update($data);
+                    return redirect()->back()->with('success', 'Teacher information updated successfully!');
+                }
+
+                if ($teacherServices->count() > 1) {
+                    // ✅ If multiple exist → delete all and recreate one clean record
+                    $userService->teacherService()->delete();
+                    $userService->teacherService()->create($data);
+                    return redirect()->back()->with('warning', 'Multiple records found. Reset and created a new one successfully!');
+                }
+
+                break;
+
 
             case 'service-info':
                 $teacherId = $teacher->id;
+
+                // ✅ Check if delete button submitted
+                if ($request->filled('delete_service_id')) {
+                    $deleteId = $request->input('delete_service_id');
+
+                    $serviceToDelete = UserInService::find($deleteId);
+                    if ($serviceToDelete) {
+                        // Delete related appointments first
+                        $serviceToDelete->appointments()->delete();
+                        $serviceToDelete->delete();
+
+                        return back()->with('success', 'Service record deleted successfully!');
+                    }
+
+                    return back()->with('error', 'Service record not found.');
+                }
                 $serviceData = $request->input('service.new', []);
                 $serviceId = $serviceData['serviceId'] ?? null;
                 $appointmentType = $serviceData['appointmentType'] ?? 1; // 1 = Permanent, 2 = Attachment
@@ -1031,98 +1158,160 @@ class TeacherController extends Controller
 
                 return redirect()->back()->with('success', 'Service updated successfully!');
 
-                case 'appointment-info':
-                    $serviceData = $request->input('service.new', []);
-                    $schoolId = $request->input('school'); // from Livewire
 
-                    $appointmentType = $serviceData['appointmentType'] ?? 1; // 1 = Permanent, 2 = Attachment
-                    $appointedDate = $serviceData['appointedDate'] ?? null;
-                    $releasedDate = $serviceData['releasedDate'] ?? null;
+            case 'appointment-info':
 
-                    $workPlaceId = School::where('id', $schoolId)->value('workPlaceId');
-                    $userServiceId = $serviceData['userInServiceId'] ?? null;
+                if ($request->filled('delete_appointment_id')) {
+                    $deleteId = $request->input('delete_appointment_id');
+                    $appointment = UserServiceAppointment::find($deleteId);
 
-                    if (!$userServiceId || !$schoolId) {
-                        return back()->with('error', 'Service and School selection required.');
+                    if ($appointment) {
+                        // Delete related positions first (if exists)
+                        $appointment->positions()->delete();
+                        $appointment->delete();
+
+                        return redirect()->back()->with('success', 'Appointment deleted successfully!');
+                    } else {
+                        return redirect()->back()->with('error', 'Appointment not found.');
+                    }
+                }
+
+                $serviceData = $request->input('service.new', []);
+                $schoolId = $request->input('school'); // from Livewire
+
+                $appointmentType = $serviceData['appointmentType'] ?? 1; // 1 = Permanent, 2 = Attachment
+                $appointedDate = $serviceData['appointedDate'] ?? null;
+                $releasedDate = $serviceData['releasedDate'] ?? null;
+
+                $workPlaceId = School::where('id', $schoolId)->value('workPlaceId');
+                $userServiceId = $serviceData['userInServiceId'] ?? null;
+
+                if (!$userServiceId || !$schoolId) {
+                    return back()->with('error', 'Service and School selection required.');
+                }
+
+                // Helper function to create appointment + linked position
+                $createAppointment = function($userServiceId, $workPlaceId, $appointmentType, $appointedDate, $releasedDate) {
+                    $appointment = UserServiceAppointment::create([
+                        'userServiceId'  => $userServiceId,
+                        'workPlaceId'    => $workPlaceId,
+                        'appointmentType'=> $appointmentType,
+                        'appointedDate'  => $appointedDate,
+                        'releasedDate'   => $releasedDate,
+                    ]);
+
+                    // Create linked position record (positionId = 1)
+                    UserServiceAppointmentPosition::create([
+                        'userServiceAppId' => $appointment->id,
+                        'positionId'       => 1,
+                        'positionedDate'   => $appointedDate,
+                    ]);
+                };
+
+                // ----------------------------------
+                // APPOINTMENT TYPE = 1 (PERMANENT)
+                // ----------------------------------
+                if ($appointmentType == 1) {
+
+                    // Case 1: Only appointedDate
+                    if ($appointedDate && !$releasedDate) {
+                        UserServiceAppointment::where('userServiceId', $userServiceId)
+                            ->where('appointmentType', 1)
+                            ->whereNull('releasedDate')
+                            ->update(['releasedDate' => $appointedDate]);
+
+                        $createAppointment($userServiceId, $workPlaceId, 1, $appointedDate, null);
                     }
 
-                    // Helper function to create appointment + linked position
-                    $createAppointment = function($userServiceId, $workPlaceId, $appointmentType, $appointedDate, $releasedDate) {
-                        $appointment = UserServiceAppointment::create([
-                            'userServiceId'  => $userServiceId,
-                            'workPlaceId'    => $workPlaceId,
-                            'appointmentType'=> $appointmentType,
-                            'appointedDate'  => $appointedDate,
-                            'releasedDate'   => $releasedDate,
-                        ]);
-
-                        // Create linked position record (positionId = 1)
-                        UserServiceAppointmentPosition::create([
-                            'userServiceAppId' => $appointment->id,
-                            'positionId'       => 1,
-                            'positionedDate'   => $appointedDate,
-                        ]);
-                    };
-
-                    // ----------------------------------
-                    // APPOINTMENT TYPE = 1 (PERMANENT)
-                    // ----------------------------------
-                    if ($appointmentType == 1) {
-
-                        // Case 1: Only appointedDate
-                        if ($appointedDate && !$releasedDate) {
-                            UserServiceAppointment::where('userServiceId', $userServiceId)
-                                ->where('appointmentType', 1)
-                                ->whereNull('releasedDate')
-                                ->update(['releasedDate' => $appointedDate]);
-
-                            $createAppointment($userServiceId, $workPlaceId, 1, $appointedDate, null);
-                        }
-
-                        // Case 2: Only releasedDate
-                        elseif (!$appointedDate && $releasedDate) {
-                            UserServiceAppointment::where('userServiceId', $userServiceId)
-                                ->where('appointmentType', 1)
-                                ->whereNull('releasedDate')
-                                ->update(['releasedDate' => $releasedDate]);
-                        }
-
-                        // Case 3: Both appointedDate & releasedDate
-                        elseif ($appointedDate && $releasedDate) {
-                            $createAppointment($userServiceId, $workPlaceId, 1, $appointedDate, $releasedDate);
-                        }
+                    // Case 2: Only releasedDate
+                    elseif (!$appointedDate && $releasedDate) {
+                        UserServiceAppointment::where('userServiceId', $userServiceId)
+                            ->where('appointmentType', 1)
+                            ->whereNull('releasedDate')
+                            ->update(['releasedDate' => $releasedDate]);
                     }
 
-                    // ----------------------------------
-                    // APPOINTMENT TYPE = 2 (ATTACHMENT)
-                    // ----------------------------------
-                    elseif ($appointmentType == 2) {
+                    // Case 3: Both appointedDate & releasedDate
+                    elseif ($appointedDate && $releasedDate) {
+                        $createAppointment($userServiceId, $workPlaceId, 1, $appointedDate, $releasedDate);
+                    }
+                }
 
-                        // Case 1: Only appointedDate
-                        if ($appointedDate && !$releasedDate) {
-                            UserServiceAppointment::where('userServiceId', $userServiceId)
-                                ->where('appointmentType', 2)
-                                ->whereNull('releasedDate')
-                                ->update(['releasedDate' => $appointedDate]);
+                // ----------------------------------
+                // APPOINTMENT TYPE = 2 (ATTACHMENT)
+                // ----------------------------------
+                elseif ($appointmentType == 2) {
 
-                            $createAppointment($userServiceId, $workPlaceId, 2, $appointedDate, null);
-                        }
+                    // Case 1: Only appointedDate
+                    if ($appointedDate && !$releasedDate) {
+                        UserServiceAppointment::where('userServiceId', $userServiceId)
+                            ->where('appointmentType', 2)
+                            ->whereNull('releasedDate')
+                            ->update(['releasedDate' => $appointedDate]);
 
-                        // Case 2: Only releasedDate
-                        elseif (!$appointedDate && $releasedDate) {
-                            UserServiceAppointment::where('userServiceId', $userServiceId)
-                                ->where('appointmentType', 2)
-                                ->whereNull('releasedDate')
-                                ->update(['releasedDate' => $releasedDate]);
-                        }
-
-                        // Case 3: Both appointedDate & releasedDate
-                        elseif ($appointedDate && $releasedDate) {
-                            $createAppointment($userServiceId, $workPlaceId, 2, $appointedDate, $releasedDate);
-                        }
+                        $createAppointment($userServiceId, $workPlaceId, 2, $appointedDate, null);
                     }
 
-                    return redirect()->back()->with('success', 'Service updated successfully!');
+                    // Case 2: Only releasedDate
+                    elseif (!$appointedDate && $releasedDate) {
+                        UserServiceAppointment::where('userServiceId', $userServiceId)
+                            ->where('appointmentType', 2)
+                            ->whereNull('releasedDate')
+                            ->update(['releasedDate' => $releasedDate]);
+                    }
+
+                    // Case 3: Both appointedDate & releasedDate
+                    elseif ($appointedDate && $releasedDate) {
+                        $createAppointment($userServiceId, $workPlaceId, 2, $appointedDate, $releasedDate);
+                    }
+                }
+
+
+
+                return redirect()->back()->with('success', 'Service updated successfully!');
+
+            case 'position-info':
+                $formAction = $request->input('form_action'); // "save" or "delete"
+
+                if ($formAction === 'delete') {
+                    $data = $request->validate([
+                        'position.delete.id' => 'required|exists:user_service_appointment_positions,id',
+                    ]);
+
+                    $position = \App\Models\UserServiceAppointmentPosition::find($data['position']['delete']['id']);
+
+                    if (!$position) {
+                        return redirect()->back()->with('error', 'Position not found!');
+                    }
+
+                    // Soft delete if column exists
+                    if (Schema::hasColumn('user_service_appointment_positions', 'active')) {
+                        $position->update(['active' => 0]);
+                    } else {
+                        $position->delete();
+                    }
+
+                    return redirect()->back()->with('success', 'Position deleted successfully!');
+                }
+
+                if ($formAction === 'save') {
+                    $data = $request->validate([
+                        'position.new.userServiceAppId' => 'required|exists:user_service_appointments,id',
+                        'position.new.positionId' => 'required|exists:positions,id',
+                        'position.new.positionedDate' => 'required|date',
+                    ]);
+
+                    \App\Models\UserServiceAppointmentPosition::create([
+                        'userServiceAppId' => $data['position']['new']['userServiceAppId'],
+                        'positionId' => $data['position']['new']['positionId'],
+                        'positionedDate' => $data['position']['new']['positionedDate'],
+                        'active' => 1,
+                    ]);
+
+                    return redirect()->back()->with('success', 'Position added successfully!');
+                }
+
+                break;
 
 
 

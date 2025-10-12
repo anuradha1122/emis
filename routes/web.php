@@ -94,8 +94,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/teacher/exportfullreportpdf', [TeacherController::class, 'exportfullreportPDF'])->name('teacher.exportfullreportpdf');
     Route::get('/teacher/transferreport', [TeacherTransferController::class, 'transferreport'])->name('teacher.transferreport');
     Route::get('/teacher/register', [TeacherController::class, 'create'])->name('teacher.register')->middleware('permission:slts_register');
-    Route::post('/teacher/register', [TeacherController::class, 'store'])->name('teacher.store');
-
+    Route::post('/teacher/register', [TeacherController::class, 'store'])->name('teacher.store')->middleware('permission:slts_register');
     Route::get('/teacher/profile', [TeacherController::class, 'profile'])->name('teacher.profile')->middleware('permission:slts_profile')->middleware('permission:slts_profile');
     Route::get('/teacher/profileedit', [TeacherController::class, 'profileedit'])->name('teacher.profileedit')->middleware('permission:slts_profile_edit');
     Route::post('/teacher/profileupdate', [TeacherController::class, 'profileupdate'])->name('teacher.profileupdate');
@@ -126,8 +125,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/principal/transferreportPDF', [PrincipalTransferController::class, 'transferreportPDF'])->name('principal.transferreportPDF');
     Route::post('/principal/exporttransferreportpdf', [PrincipalTransferController::class, 'exporttransferreportPDF'])->name('principal.exporttransferreportpdf');
     Route::get('/principal/register', [PrincipalController::class, 'create'])->name('principal.register')->middleware('permission:slps_register');
-    Route::post('/principal/register', [PrincipalController::class, 'store'])->name('principal.store');
-
+    Route::post('/principal/register', [PrincipalController::class, 'store'])->name('principal.store')->middleware('permission:slps_register');
     Route::get('/principal/profile', [PrincipalController::class, 'profile'])->name('principal.profile')->middleware('permission:slps_profile');
     Route::get('/principal/profileedit', [PrincipalController::class, 'profileedit'])->name('principal.profileedit')->middleware('permission:slps_profile_edit');
     Route::post('/principal/profileupdate', [PrincipalController::class, 'profileupdate'])->name('principal.profileupdate');
