@@ -12,15 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('student_schools', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign keys
-            $table->foreignId('studentId')
-                  ->constrained('students')
+            // Foreign UUIDs
+            $table->uuid('studentId');
+            $table->foreign('studentId')
+                  ->references('id')
+                  ->on('students')
                   ->restrictOnDelete();
 
-            $table->foreignId('schoolId')
-                  ->constrained('schools')
+            $table->uuid('schoolId');
+            $table->foreign('schoolId')
+                  ->references('id')
+                  ->on('schools')
                   ->restrictOnDelete();
 
             $table->date('appointedDate');

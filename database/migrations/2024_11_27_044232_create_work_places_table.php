@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_places', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->integer('incrementId')->unsigned()->unique();
             $table->string('name', 200)->required();
             $table->mediumInteger('censusNo')->unsigned()->nullable();
             $table->foreignId('catagoryId')->constrained('work_place_catagories')->restrictOnDelete();

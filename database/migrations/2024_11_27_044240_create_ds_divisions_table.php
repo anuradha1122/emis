@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ds_divisions', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
             // FK to districts
             $table->foreignId('districtId')->constrained('districts')->restrictOnDelete();

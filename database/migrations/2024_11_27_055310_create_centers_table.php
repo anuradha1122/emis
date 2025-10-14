@@ -12,21 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('centers', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to work_places
-            $table->foreignId('workPlaceId')
-                  ->constrained('work_places')
+            // Foreign UUIDs
+            $table->uuid('workPlaceId');
+            $table->foreign('workPlaceId')
+                  ->references('id')
+                  ->on('work_places')
                   ->restrictOnDelete();
 
-            // Foreign key to offices
-            $table->foreignId('officeId')
-                  ->constrained('offices')
+            $table->uuid('officeId');
+            $table->foreign('officeId')
+                  ->references('id')
+                  ->on('offices')
                   ->restrictOnDelete();
 
             $table->mediumInteger('centerNo')->unsigned();
 
-            // Foreign key to center_types
+            // Foreign key to center_types (auto-increment integer)
             $table->foreignId('centerTypeId')
                   ->constrained('center_types')
                   ->restrictOnDelete();
@@ -36,7 +40,6 @@ return new class extends Migration
 
             $table->timestamps();
         });
-
     }
 
     /**

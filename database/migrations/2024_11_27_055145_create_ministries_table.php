@@ -12,20 +12,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ministries', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to work_places
-            $table->foreignId('workPlaceId')
-                  ->constrained('work_places')
+            $table->integer('incrementId')->unsigned()->unique();
+            $table->integer('workPlaceIncrementId')->unsigned()->unique();
+            // Foreign UUIDs
+            $table->uuid('workPlaceId');
+            $table->foreign('workPlaceId')
+                  ->references('id')
+                  ->on('work_places')
                   ->restrictOnDelete();
 
-            // Foreign key to offices (nullable)
-            $table->foreignId('officeId')
-                  ->nullable()
-                  ->constrained('offices')
+            $table->integer('officeIncrementId')->unsigned()->nullable();
+            $table->uuid('officeId')->nullable();
+            $table->foreign('officeId')
+                  ->references('id')
+                  ->on('offices')
                   ->nullOnDelete();
 
-            // Foreign key to ministry_types (nullable)
+            // Foreign key to ministry_types (auto increment)
             $table->foreignId('ministryTypeId')
                   ->nullable()
                   ->constrained('ministry_types')

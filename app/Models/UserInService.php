@@ -8,21 +8,45 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class UserInService extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'userId', 'serviceId', 'appointedDate', 'releasedDate', 'current'
+        'incrementId', 'userIncrementId', 'userId', 'serviceId', 'appointedDate', 'releasedDate', 'current'
     ];
+
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected static function booted()
     {
         static::addGlobalScope('active', function (Builder $builder) {
             $builder->where('active', 1);
         });
+
+        static::creating(function ($model) {
+            // UUID primary key
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+
+            //Auto-increment incrementId
+            if (empty($model->incrementId)) {
+                $max = static::max('incrementId') ?? 0;
+                $model->incrementId = $max + 1;
+            }
+        });
     }
+
+    // protected static function booted()
+    // {
+    //     static::addGlobalScope('active', function (Builder $builder) {
+    //         $builder->where('active', 1);
+    //     });
+    // }
 
     /**
      * Scope for current service rows (releasedDate is null).

@@ -6,34 +6,8 @@ use App\Http\Requests\StoreUserRequest;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Subject;
-use App\Models\AppointmentMedium;
-use App\Models\AppointmentCategory;
-use App\Models\Race;
-use App\Models\CivilStatus;
-use App\Models\Religion;
-use App\Models\BloodGroup;
-use App\Models\Illness;
-use App\Models\Rank;
 use App\Models\User;
 use App\Models\UserInService;
-use App\Models\Service;
-use App\Models\UserServiceInRank;
-use App\Models\UserServiceAppointment;
-use App\Models\UserServiceAppointmentPosition;
-use App\Models\TeacherService;
-use App\Models\ContactInfo;
-use App\Models\PersonalInfo;
-use App\Models\LocationInfo;
-use App\Models\AppointmentTermination;
-use App\Models\EducationQualification;
-use App\Models\ProfessionalQualification;
-use App\Models\EducationQualificationInfo;
-use App\Models\ProfessionalQualificationInfo;
-use App\Models\FamilyInfo;
-use App\Models\FamilyMemberType;
-use App\Models\WorkPlace;
-use App\Models\School;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
@@ -243,211 +217,17 @@ class UserController extends Controller
 
     public function myprofileedit(Request $request)
     {
-        //dd($request->category);
-        //dd(Auth::check(), Auth::user(), Auth::id());
 
-        //dd($request->has('category'), $request->input('category'));
-
-        if (Auth::check() && $request->has('category')) {
+        if (Auth::check() && $request->has('section')) {
             try{
 
-                $option = [
-                    'Dashboard' => 'dashboard',
-                    'My Profile' => route('profile.myprofile'),
-                    'My Profile Edit' => htmlspecialchars_decode(route('profile.myprofileedit',['category' => $request->category])),
-                ];
-
-                $category = $request->category;
+                $section = $request->section;
 
                 $user = User::find(Auth::user()->id);
 
-                $races = collect([]);
-                $religions = collect([]);
-                $civilStatuses = collect([]);
-                $bloodGroups = collect([]);
-                $illnesses = collect([]);
-
-                $personal_infos = null;
-
-                if($category == 'personal')
-                {
-                    $races = Race::where('active', 1)->get();
-                    $religions = Religion::where('active', 1)->get();
-                    $civilStatuses = CivilStatus::where('active', 1)->get();
-                    $bloodGroups = BloodGroup::where('active', 1)->get();
-                    $illnesses = Illness::where('active', 1)->get();
-
-                    $personal_infos = DB::table('personal_infos')
-                    ->leftJoin('races', function ($join) {
-                        $join->on('personal_infos.raceId', '=', 'races.id')
-                            ->where('races.active', 1);
-                    })
-                    ->leftJoin('religions', function ($join) {
-                        $join->on('personal_infos.religionId', '=', 'religions.id')
-                            ->where('religions.active', 1);
-                    })
-                    ->leftJoin('civil_statuses', function ($join) {
-                        $join->on('personal_infos.civilStatusId', '=', 'civil_statuses.id')
-                            ->where('civil_statuses.active', 1);
-                    })
-                    ->leftJoin('blood_groups', function ($join) {
-                        $join->on('personal_infos.bloodGroupId', '=', 'blood_groups.id')
-                            ->where('blood_groups.active', 1);
-                    })
-                    ->leftJoin('illnesses', function ($join) {
-                        $join->on('personal_infos.illnessId', '=', 'illnesses.id')
-                            ->where('illnesses.active', 1);
-                    })
-                    ->where('personal_infos.active', 1)
-                    ->where('personal_infos.userId', Auth::user()->id)
-                    ->select(
-                        'personal_infos.birthDay',
-                        'races.name as race',
-                        'religions.name as religion',
-                        'civil_statuses.name as civil_status',
-                        'blood_groups.name as blood_group',
-                        'illnesses.name as illness'
-                    )
-                    ->first();
-                }
-
-                $contact_infos = null;
-                if($category == 'contact')
-                {
-
-                    $contact_infos = DB::table('contact_infos')
-                    ->where('active', 1)
-                    ->where('userId', Auth::id())
-                    ->first();
-                    //dd($contact_infos);
-                }
-
-                $location_info_educations = null;
-                $location_info_positions = null;
-                if($category == 'location')
-                {
-                    $location_info_educations = DB::table('location_infos')
-                    ->join('offices as division', 'location_infos.educationDivisionId', '=', 'division.id')
-                    ->join('offices as zone', 'division.higherOfficeId', '=', 'zone.id')
-                    ->join('offices as province', 'zone.higherOfficeId', '=', 'province.id')
-                    ->join('work_places as division_wp', 'division.workPlaceId', '=', 'division_wp.id')
-                    ->join('work_places as zone_wp', 'zone.workPlaceId', '=', 'zone_wp.id')
-                    ->join('work_places as province_wp', 'province.workPlaceId', '=', 'province_wp.id')
-                    ->select(
-                        'location_infos.*',
-                        // 'division.name as division_name',
-                        // 'zone.name as zone_name',
-                        // 'province.name as province_name',
-                        'division_wp.name as division',
-                        'zone_wp.name as zone',
-                        'province_wp.name as department'
-                    )
-                    ->where('location_infos.active', 1) // optional: filter active
-                    ->where('location_infos.userId', Auth::id())
-                    ->first();
-                    //dd($location_infos);
-
-                    $location_info_positions = DB::table('location_infos')
-                        ->join('gn_divisions', 'location_infos.gnDivisionId', '=', 'gn_divisions.id')
-                        ->join('ds_divisions', 'gn_divisions.dsId', '=', 'ds_divisions.id')
-                        ->join('districts', 'ds_divisions.districtId', '=', 'districts.id')
-                        ->join('provinces', 'districts.provinceId', '=', 'provinces.id')
-                        ->select(
-                            'location_infos.*',
-                            'gn_divisions.name as gn_division',
-                            'gn_divisions.gnCode',
-                            'ds_divisions.name as ds_division',
-                            'districts.name as district',
-                            'provinces.name as province'
-                        )
-                        ->where('location_infos.active', 1)
-                        ->where('location_infos.userId', Auth::id())
-                        ->first();
-                }
-
-
-                $services = collect([]);
-                $current_service_infos = collect([]);
-                $previous_service_infos = collect([]);
-
-                // if($category == 'service')
-                // {
-                //     $services = Service::where('active', 1)->get();
-                //     $service_infos = DB::table('user_in_services')
-                //         ->join('services', 'user_in_services.serviceId', '=', 'services.id')
-                //         ->where('user_in_services.userId', Auth::id())
-                //         ->select('user_in_services.id AS id', 'user_in_services.*', 'services.name AS name') // adjust fields as needed
-                //         ->get();
-
-                //         // Divide into two arrays
-                //         $current_service_infos = $service_infos->filter(function ($item) {
-                //             return is_null($item->releasedDate);
-                //         })->values();
-
-                //         $previous_service_infos = $service_infos->filter(function ($item) {
-                //             return !is_null($item->releasedDate);
-                //         })->values();
-                //     //dd($service_infos);
-                // }
-
-                $appointment_lists = collect([]);
-                if($category == 'appointment')
-                {
-                    $appointment_lists = DB::table('user_in_services')
-                    ->join('services', 'user_in_services.serviceId', '=', 'services.id')
-                    ->join('user_service_appointments', 'user_service_appointments.userServiceId', '=', 'user_in_services.id')
-                    ->join('work_places', 'work_places.id', '=', 'user_service_appointments.workPlaceId')
-                    ->where('user_in_services.userId', $user->id)
-                    ->where('user_in_services.active', 1)
-                    ->where('services.active', 1)
-                    ->where('user_service_appointments.active', 1)
-                    ->where('work_places.active', 1)
-                    ->whereNotNull('user_service_appointments.releasedDate')
-                    ->select(
-                        'user_service_appointments.id as id',
-                        DB::raw("CONCAT(services.name, ' | ', work_places.name, ' | ', user_service_appointments.appointedDate, ' - ', user_service_appointments.releasedDate) as name")
-                    )
-                    ->get();
-
-                }
-
-                $educationQualifications = collect([]);
-                $professionalQualifications = collect([]);
-                if($category == 'qualification')
-                {
-                    $educationQualifications = EducationQualification::where('active', 1)->get();
-                    $professionalQualifications = ProfessionalQualification::where('active', 1)->get();
-                }
-
-                $ranks = collect([]);
-                if($category == 'rank')
-                {
-                    $ranks = Rank::where('active', 1)
-                    ->where('serviceId', 1)
-                    ->get();
-
-                }
-
-                return view('profile/myprofileedit', compact(
+                return view('profile.profile-edit', compact(
                     'user',
-                    'category',
-                    'races',
-                    'religions',
-                    'civilStatuses',
-                    'bloodGroups',
-                    'illnesses',
-                    'personal_infos',
-                    'contact_infos',
-                    'location_info_educations',
-                    'location_info_positions',
-                    'services',
-                    'current_service_infos',
-                    'previous_service_infos',
-                    'appointment_lists',
-                    'educationQualifications',
-                    'professionalQualifications',
-                    'ranks',
-                    'option'
+                    'section',
                 ));
 
 
@@ -457,24 +237,33 @@ class UserController extends Controller
             }
 
         }else{
-            dd('adad');
-            //return redirect()->route('teacher.search');
+            return redirect()->route('teacher.search');
         }
     }
 
-    public function myprofilestore(StoreUserRequest $request)
+
+    public function myprofilestore(Request $request)
     {
-        $category = $request->input('category');
-        if ($category === 'login') {
+        $section = $request->input('section');
+        //dd($section);
+        if ($section === 'login-info') {
+            // 🔹 Handle password reset
+            $request->validate([
+                'password' => 'required|min:8|confirmed', // requires 'password_confirmation' field
+            ]);
+
+            // Assuming user is logged in
             $user = auth()->user();
-            if (!Hash::check($request->currentPassword, $user->password)) {
-                return back()->withErrors(['currentPassword' => 'Current password is incorrect.']);
-            }
-            $user->password = Hash::make($request->newPassword);
-            $user->save();
+
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            return back()->with('success', 'Password has been updated successfully!');
         }
 
-        return redirect()->back()->with('success', 'Information updated successfully!');
+        // 🔹 Handle other sections if needed
+        return back()->with('info', 'No valid section selected.');
     }
 
     public function myappointment()

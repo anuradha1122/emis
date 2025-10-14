@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('student_contact_infos', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // One-to-one relationship with students
-            $table->foreignId('studentId')
-                  ->unique()
-                  ->constrained('students')
+            // One-to-one relationship with students (UUID)
+            $table->uuid('studentId')->unique();
+            $table->foreign('studentId')
+                  ->references('id')
+                  ->on('students')
                   ->restrictOnDelete();
 
             // Student address

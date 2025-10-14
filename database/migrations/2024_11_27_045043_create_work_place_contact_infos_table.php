@@ -12,26 +12,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_place_contact_infos', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to work_places
-            $table->foreignId('workPlaceId')
-                  ->constrained('work_places')
-                  ->restrictOnDelete()
-                  ->unique(); // assuming one contact info per workplace
+            // Foreign key to work_places (UUID)
+            $table->uuid('workPlaceId')->unique();
+            $table->foreign('workPlaceId')
+                  ->references('id')
+                  ->on('work_places')
+                  ->restrictOnDelete();
 
+            // Address lines
             $table->string('addressLine1', 80);
             $table->string('addressLine2', 80);
             $table->string('addressLine3', 80);
 
+            // Contact numbers
             $table->string('mobile1', 10)->unique();
-            $table->string('mobile2', 10)->nullable()->unique(); // mobile2 may not be required
+            $table->string('mobile2', 10)->nullable()->unique();
 
+            // Status
             $table->boolean('active')->default(true);
 
             $table->timestamps();
         });
-
     }
 
     /**

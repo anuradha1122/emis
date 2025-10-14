@@ -12,23 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('personal_infos', function (Blueprint $table) {
-            $table->id(); 
+            // UUID primary key
+            $table->uuid('id')->primary();
 
-            // Link to users (1-to-1, each user has only one personal info record)
-            $table->foreignId('userId')->unique()->constrained('users')->cascadeOnDelete();
+            // Link to users (1-to-1)
+            $table->uuid('userId')->unique();
+            $table->foreign('userId')->references('id')->on('users')->cascadeOnDelete();
 
-            // Profile picture path (nullable)
+            // Profile picture path
             $table->string('profilePicture', 300)->nullable();
 
-            // Foreign keys to lookup tables (tinyint is fine if you have <255 records in each)
-
+            // Foreign keys to lookup tables (still int if those tables use auto-increment)
             $table->foreignId('raceId')->nullable()->constrained('races')->restrictOnDelete();
             $table->foreignId('religionId')->nullable()->constrained('religions')->restrictOnDelete();
             $table->foreignId('civilStatusId')->nullable()->constrained('civil_statuses')->restrictOnDelete();
-            $table->tinyInteger('genderId')->unsigned()->nullable(); // now optional
+            $table->tinyInteger('genderId')->unsigned()->nullable();
             $table->foreignId('bloodGroupId')->nullable()->constrained('blood_groups')->restrictOnDelete();
             $table->foreignId('illnessId')->nullable()->constrained('illnesses')->restrictOnDelete();
-
 
             // Birthday is required
             $table->date('birthDay');

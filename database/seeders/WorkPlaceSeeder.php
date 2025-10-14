@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\WorkPlace;
 
 class WorkPlaceSeeder extends Seeder
 {
@@ -451,7 +452,9 @@ class WorkPlaceSeeder extends Seeder
             array('name' => 'Kitulgala Division','censusNo' => NULL,'catagoryId' => '2')
         );
 
-        DB::table('work_places')->insert($data);
+        foreach ($data as $wp) {
+            WorkPlace::create($wp);
+        }
 
         $data = array(
             array('name' => 'WE/COL/CLMN DE LA SALLE COLLEGE(1)','censusNo' => '1','catagoryId' => '1'),
@@ -5456,7 +5459,9 @@ class WorkPlaceSeeder extends Seeder
             array('name' => 'ES/KKD/KRPN BT/KK/ALANKULAM G.T.M.S(14012)','censusNo' => '14012','catagoryId' => '1'),
         );
 
-        DB::table('work_places')->insert($data);
+        foreach ($data as $wp) {
+            WorkPlace::create($wp);
+        }
 
         $data = array(
             array('name' => 'ES/KKD/KRPN PUNANAI G.T.M.SCHOOL(14013)','censusNo' => '14013','catagoryId' => '1'),
@@ -10663,7 +10668,9 @@ class WorkPlaceSeeder extends Seeder
             array('name' => 'SG/NVG/ELAP ALUPATHGALA V(23396)','censusNo' => '23396','catagoryId' => '1')
         );
 
-        DB::table('work_places')->insert($data);
+        foreach ($data as $wp) {
+            WorkPlace::create($wp);
+        }
 
     }
 }

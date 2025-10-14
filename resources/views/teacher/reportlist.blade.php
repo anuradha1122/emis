@@ -50,7 +50,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (Auth::user()->hasPermission('slts_full_report'))
+
                                 <tr class="border-b border-gray-200 dark:border-gray-700">
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">#1001</td>
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Teacher Full Report</td>
@@ -62,8 +62,7 @@
                                         <a href="{{ route('teacher.fullreport') }}" class="text-blue-500 dark:text-blue-400 hover:underline">View</a>
                                     </td>
                                 </tr>
-                                @endif
-                                @if (Auth::user()->hasPermission('slts_full_report_pdf'))
+
                                 <tr class="border-b border-gray-200 dark:border-gray-700">
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">#1002</td>
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Teacher Full Report PDF</td>
@@ -74,7 +73,6 @@
                                         <a href="{{ route('teacher.fullreportPDF') }}" class="text-blue-500 dark:text-blue-400 hover:underline">View</a>
                                     </td>
                                 </tr>
-                                @endif
 
                                 <tr class="border-b border-gray-200 dark:border-gray-700">
                                     <td class="py-3 px-4 text-gray-700 dark:text-gray-300">#1003</td>

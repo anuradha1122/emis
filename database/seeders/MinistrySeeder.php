@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\Office;
+use App\Models\WorkPlace;
+use App\Models\Ministry;
 
 class MinistrySeeder extends Seeder
 {
@@ -19,19 +22,37 @@ class MinistrySeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $data = array(
-            array('workPlaceId' => '1','officeId' => NULL,'ministryNo' => 'M1'),
-            array('workPlaceId' => '2','officeId' => '1','ministryNo' => 'M2'),
-            array('workPlaceId' => '3','officeId' => '2','ministryNo' => 'M3'),
-            array('workPlaceId' => '4','officeId' => '3','ministryNo' => 'M4'),
-            array('workPlaceId' => '5','officeId' => '4','ministryNo' => 'M5'),
-            array('workPlaceId' => '6','officeId' => '5','ministryNo' => 'M6'),
-            array('workPlaceId' => '7','officeId' => '6','ministryNo' => 'M7'),
-            array('workPlaceId' => '8','officeId' => '7','ministryNo' => 'M8'),
-            array('workPlaceId' => '9','officeId' => '8','ministryNo' => 'M9'),
-            array('workPlaceId' => '10','officeId' => '9','ministryNo' => 'M10')
+            array('workPlaceIncrementId' => '1','officeIncrementId' => NULL,'ministryNo' => 'M1'),
+            array('workPlaceIncrementId' => '2','officeIncrementId' => '1','ministryNo' => 'M2'),
+            array('workPlaceIncrementId' => '3','officeIncrementId' => '2','ministryNo' => 'M3'),
+            array('workPlaceIncrementId' => '4','officeIncrementId' => '3','ministryNo' => 'M4'),
+            array('workPlaceIncrementId' => '5','officeIncrementId' => '4','ministryNo' => 'M5'),
+            array('workPlaceIncrementId' => '6','officeIncrementId' => '5','ministryNo' => 'M6'),
+            array('workPlaceIncrementId' => '7','officeIncrementId' => '6','ministryNo' => 'M7'),
+            array('workPlaceIncrementId' => '8','officeIncrementId' => '7','ministryNo' => 'M8'),
+            array('workPlaceIncrementId' => '9','officeIncrementId' => '8','ministryNo' => 'M9'),
+            array('workPlaceIncrementId' => '10','officeIncrementId' => '9','ministryNo' => 'M10')
         );
 
-        DB::table('ministries')->insert($data);
+        foreach ($data as $item) {
+            //dd($item);
+            // find WorkPlace by incrementId
+            $workPlace = WorkPlace::where('incrementId', $item['workPlaceIncrementId'])->first();
+            //dd($workPlace->id, $item);
+            if ($workPlace) {
+                $item['workPlaceId'] = $workPlace->id; // assign UUID foreign key
+                $office = Office::where('incrementId', $item['officeIncrementId'])->first();
+                if ($office) {
+                    $item['officeId'] = $office->id; // assign UUID foreign key
+                } else {
+                    $item['officeId'] = null; // assign null if not found
+                }
+            } else {
+                continue; // skip if not found
+            }
+            //dd($item);
+            Ministry::create($item);
+        }
 
 
     }

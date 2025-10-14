@@ -12,13 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('teacher_services', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign keys
-            $table->foreignId('userServiceId')
-                  ->constrained('user_in_services')
+            // Foreign UUID to user_in_services
+            $table->uuid('userServiceId');
+            $table->foreign('userServiceId')
+                  ->references('id')
+                  ->on('user_in_services')
                   ->restrictOnDelete();
 
+            // Foreign keys to lookup tables (auto-increment)
             $table->foreignId('appointmentSubjectId')
                   ->constrained('subjects')
                   ->restrictOnDelete();
@@ -40,6 +44,7 @@ return new class extends Migration
 
             $table->timestamps();
         });
+
     }
 
     /**

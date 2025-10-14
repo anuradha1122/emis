@@ -12,72 +12,65 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('teacher_transfers', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
             // Reference number
             $table->unsignedBigInteger('referenceNo');
 
-            // Foreign key to user_in_services
-            $table->foreignId('userServiceId')
-                  ->constrained('user_in_services')
-                  ->restrictOnDelete();
+            // Foreign UUID to user_in_services
+            $table->uuid('userServiceId');
+            $table->foreign('userServiceId')
+                ->references('id')
+                ->on('user_in_services')
+                ->restrictOnDelete();
 
-            // Foreign keys to transfer types and reasons
+            // Foreign keys to lookup tables (auto-increment)
             $table->foreignId('typeId')
-                  ->constrained('transfer_types')
-                  ->restrictOnDelete();
+                ->constrained('transfer_types')
+                ->restrictOnDelete();
 
             $table->foreignId('reasonId')
-                  ->constrained('transfer_reasons')
-                  ->restrictOnDelete();
+                ->constrained('transfer_reasons')
+                ->restrictOnDelete();
 
-            // Schools (primary choices)
-            $table->foreignId('school1Id')
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            // Schools (primary choices, UUID)
+            $table->uuid('school1Id');
+            $table->foreign('school1Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('school2Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('school2Id')->nullable();
+            $table->foreign('school2Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('school3Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('school3Id')->nullable();
+            $table->foreign('school3Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('school4Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('school4Id')->nullable();
+            $table->foreign('school4Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('school5Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('school5Id')->nullable();
+            $table->foreign('school5Id')->references('id')->on('schools')->restrictOnDelete();
 
             // Any school flag
             $table->boolean('anySchool')->default(false);
 
-            // Optional grade
-            $table->tinyInteger('gradeId')->unsigned()->nullable();
+            // Grade (auto-increment foreign key)
+            $table->foreignId('gradeId')->nullable()->constrained('grades')->restrictOnDelete();
 
-            // Alternate schools
-            $table->foreignId('alterSchool1Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            // Alternate schools (UUID)
+            $table->uuid('alterSchool1Id')->nullable();
+            $table->foreign('alterSchool1Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('alterSchool2Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('alterSchool2Id')->nullable();
+            $table->foreign('alterSchool2Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('alterSchool3Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('alterSchool3Id')->nullable();
+            $table->foreign('alterSchool3Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('alterSchool4Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('alterSchool4Id')->nullable();
+            $table->foreign('alterSchool4Id')->references('id')->on('schools')->restrictOnDelete();
 
-            $table->foreignId('alterSchool5Id')->nullable()
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            $table->uuid('alterSchool5Id')->nullable();
+            $table->foreign('alterSchool5Id')->references('id')->on('schools')->restrictOnDelete();
 
             // Extra fields
             $table->string('extraCurricular', 1000)->nullable();
@@ -88,6 +81,7 @@ return new class extends Migration
 
             $table->timestamps();
         });
+
     }
 
     /**

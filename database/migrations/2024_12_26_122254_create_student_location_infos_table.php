@@ -12,22 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('student_location_infos', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to students
-            $table->foreignId('studentId')
-                  ->constrained('students')
+            // Foreign UUID to students
+            $table->uuid('studentId');
+            $table->foreign('studentId')
+                  ->references('id')
+                  ->on('students')
                   ->restrictOnDelete();
 
-            // Foreign keys for divisions (optional)
-            $table->foreignId('educationDivisionId')
-                  ->nullable()
-                  ->constrained('offices') // Assuming education divisions are stored in offices table
+            // Foreign UUIDs for divisions
+            $table->uuid('educationDivisionId')->nullable();
+            $table->foreign('educationDivisionId')
+                  ->references('id')
+                  ->on('offices')
                   ->nullOnDelete();
 
-            $table->foreignId('gnDivisionId')
-                  ->nullable()
-                  ->constrained('gn_divisions')
+            $table->uuid('gnDivisionId')->nullable();
+            $table->foreign('gnDivisionId')
+                  ->references('id')
+                  ->on('gn_divisions')
                   ->nullOnDelete();
 
             // Active flag

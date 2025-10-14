@@ -12,28 +12,34 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('student_personal_infos', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // One-to-one relationship with students
-            $table->foreignId('studentId')
-                  ->unique()
-                  ->constrained('students')
+            // One-to-one relationship with students (UUID)
+            $table->uuid('studentId')->unique();
+            $table->foreign('studentId')
+                  ->references('id')
+                  ->on('students')
                   ->restrictOnDelete();
 
             // Optional profile picture
             $table->string('profilePicture', 300)->nullable();
 
-            // Foreign keys for lookup tables
+            // Foreign keys for lookup tables (auto-increment)
             $table->foreignId('raceId')->nullable()->constrained('races');
             $table->foreignId('religionId')->nullable()->constrained('religions');
             $table->tinyInteger('genderId')->unsigned(); // required
             $table->foreignId('bloodGroupId')->nullable()->constrained('blood_groups');
             $table->foreignId('illnessId')->nullable()->constrained('illnesses');
-            $table->foreignId('birthDsDivisionId')->nullable()->constrained('ds_divisions');
+            $table->uuid('birthDsDivisionId')->nullable();
+            $table->foreign('birthDsDivisionId')
+                ->references('id')
+                ->on('ds_divisions')
+                ->nullOnDelete();
 
             // Birth details
             $table->date('birthDay');
-            $table->string('birthCertificate', 100)->required(); // use string instead of int for flexibility
+            $table->string('birthCertificate', 100);
 
             // Active flag
             $table->boolean('active')->default(true);

@@ -12,11 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_service_accounts', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to user_service
-            $table->foreignId('userServiceId')
-                  ->constrained('user_in_services')
+            // Foreign UUID to user_in_services
+            $table->uuid('userServiceId');
+            $table->foreign('userServiceId')
+                  ->references('id')
+                  ->on('user_in_services')
                   ->restrictOnDelete();
 
             // Account year

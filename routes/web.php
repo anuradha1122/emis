@@ -81,22 +81,22 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    Route::get('/myprofile', [UserController::class, 'myprofile'])->name('profile.myprofile')->middleware('permission:my_profile');
+    Route::get('/myprofile', [UserController::class, 'myprofile'])->name('profile.myprofile');
     Route::get('/myprofileedit', [UserController::class, 'myprofileedit'])->name('profile.myprofileedit');
     Route::post('/myprofilestore', [UserController::class, 'myprofilestore'])->name('profile.myprofilestore');
     Route::get('/myappointment', [UserController::class, 'myappointment'])->name('profile.myappointment');
 
     /* Teacher Section */
-    Route::get('/teacher/dashboard', [TeacherController::class, 'index'])->name('teacher.dashboard')->middleware('permission:slts_dashboard');
-    Route::get('/teacher/reportlist', [TeacherController::class, 'reportlist'])->name('teacher.reportlist')->middleware('permission:slts_report_list');
-    Route::get('/teacher/fullreport', [TeacherController::class, 'fullreport'])->name('teacher.fullreport')->middleware('permission:slts_full_report');
-    Route::get('/teacher/fullreportPDF', [TeacherController::class, 'fullreportPDF'])->name('teacher.fullreportPDF')->middleware('permission:slts_full_report_pdf');
+    Route::get('/teacher/dashboard', [TeacherController::class, 'index'])->name('teacher.dashboard');
+    Route::get('/teacher/reportlist', [TeacherController::class, 'reportlist'])->name('teacher.reportlist');
+    Route::get('/teacher/fullreport', [TeacherController::class, 'fullreport'])->name('teacher.fullreport');
+    Route::get('/teacher/fullreportPDF', [TeacherController::class, 'fullreportPDF'])->name('teacher.fullreportPDF');
     Route::post('/teacher/exportfullreportpdf', [TeacherController::class, 'exportfullreportPDF'])->name('teacher.exportfullreportpdf');
     Route::get('/teacher/transferreport', [TeacherTransferController::class, 'transferreport'])->name('teacher.transferreport');
-    Route::get('/teacher/register', [TeacherController::class, 'create'])->name('teacher.register')->middleware('permission:slts_register');
-    Route::post('/teacher/register', [TeacherController::class, 'store'])->name('teacher.store')->middleware('permission:slts_register');
-    Route::get('/teacher/profile', [TeacherController::class, 'profile'])->name('teacher.profile')->middleware('permission:slts_profile')->middleware('permission:slts_profile');
-    Route::get('/teacher/profileedit', [TeacherController::class, 'profileedit'])->name('teacher.profileedit')->middleware('permission:slts_profile_edit');
+    Route::get('/teacher/register', [TeacherController::class, 'create'])->name('teacher.register');
+    Route::post('/teacher/register', [TeacherController::class, 'store'])->name('teacher.store');
+    Route::get('/teacher/profile', [TeacherController::class, 'profile'])->name('teacher.profile');
+    Route::get('/teacher/profileedit', [TeacherController::class, 'profileedit'])->name('teacher.profileedit');
     Route::post('/teacher/profileupdate', [TeacherController::class, 'profileupdate'])->name('teacher.profileupdate');
 
 
@@ -115,19 +115,19 @@ Route::middleware('auth')->group(function () {
 
 
     /* principal Section */
-    Route::get('/principal/dashboard', [PrincipalController::class, 'index'])->name('principal.dashboard')->middleware('permission:slps_dashboard');
-    Route::get('/principal/reportlist', [PrincipalController::class, 'reportlist'])->name('principal.reportlist')->middleware('permission:slps_report_list');
-    Route::get('/principal/fullreport', [PrincipalController::class, 'fullreport'])->name('principal.fullreport')->middleware('permission:slps_full_report');
-    Route::get('/principal/fullreportPDF', [PrincipalController::class, 'fullreportPDF'])->name('principal.fullreportPDF')->middleware('permission:slps_full_report_pdf');
+    Route::get('/principal/dashboard', [PrincipalController::class, 'index'])->name('principal.dashboard');
+    Route::get('/principal/reportlist', [PrincipalController::class, 'reportlist'])->name('principal.reportlist');
+    Route::get('/principal/fullreport', [PrincipalController::class, 'fullreport'])->name('principal.fullreport');
+    Route::get('/principal/fullreportPDF', [PrincipalController::class, 'fullreportPDF'])->name('principal.fullreportPDF');
     //Route::get('/principal/fullreportpdf', [PrincipalController::class, 'fullreportPDF'])->name('principal.fullreportpdf');
     Route::post('/principal/exportfullreportpdf', [PrincipalController::class, 'exportfullreportPDF'])->name('principal.exportfullreportpdf');
     Route::get('/principal/transferreport', [PrincipalTransferController::class, 'transferreport'])->name('principal.transferreport');
     Route::get('/principal/transferreportPDF', [PrincipalTransferController::class, 'transferreportPDF'])->name('principal.transferreportPDF');
     Route::post('/principal/exporttransferreportpdf', [PrincipalTransferController::class, 'exporttransferreportPDF'])->name('principal.exporttransferreportpdf');
-    Route::get('/principal/register', [PrincipalController::class, 'create'])->name('principal.register')->middleware('permission:slps_register');
-    Route::post('/principal/register', [PrincipalController::class, 'store'])->name('principal.store')->middleware('permission:slps_register');
-    Route::get('/principal/profile', [PrincipalController::class, 'profile'])->name('principal.profile')->middleware('permission:slps_profile');
-    Route::get('/principal/profileedit', [PrincipalController::class, 'profileedit'])->name('principal.profileedit')->middleware('permission:slps_profile_edit');
+    Route::get('/principal/register', [PrincipalController::class, 'create'])->name('principal.register');
+    Route::post('/principal/register', [PrincipalController::class, 'store'])->name('principal.store');
+    Route::get('/principal/profile', [PrincipalController::class, 'profile'])->name('principal.profile');
+    Route::get('/principal/profileedit', [PrincipalController::class, 'profileedit'])->name('principal.profileedit');
     Route::post('/principal/profileupdate', [PrincipalController::class, 'profileupdate'])->name('principal.profileupdate');
 
     /* Principal Transfer Section */
@@ -149,11 +149,11 @@ Route::get('/school/classprofile/{id?}', [SchoolController::class, 'classprofile
 Route::get('/school/classsetup', [SchoolController::class, 'classsetup'])->name('school.classsetup');
 Route::post('/school/classprofile/{id?}', [SchoolController::class, 'classstore'])->name('school.classstore');
 
-Route::get('/school/dashboard', [SchoolController::class, 'index'])->name('school.dashboard')->middleware('permission:school_dashboard');
-Route::get('/school/register', [SchoolController::class, 'create'])->name('school.register')->middleware('permission:school_register');
+Route::get('/school/dashboard', [SchoolController::class, 'index'])->name('school.dashboard');
+Route::get('/school/register', [SchoolController::class, 'create'])->name('school.register');
 Route::post('/school/register', [SchoolController::class, 'store'])->name('school.store');
-Route::get('/school/reportlist', [SchoolController::class, 'reportlist'])->name('school.reportlist')->middleware('permission:school_report_list');
-Route::get('/school/fullreport', [SchoolController::class, 'fullreport'])->name('school.fullreport')->middleware('permission:school_full_report');
+Route::get('/school/reportlist', [SchoolController::class, 'reportlist'])->name('school.reportlist');
+Route::get('/school/fullreport', [SchoolController::class, 'fullreport'])->name('school.fullreport');
 Route::get('/school/fullreportPDF', [SchoolController::class, 'fullreportPDF'])->name('school.fullreportPDF');
 Route::post('/school/exportfullreportpdf', [SchoolController::class, 'exportfullreportPDF'])->name('school.exportfullreportpdf');
 

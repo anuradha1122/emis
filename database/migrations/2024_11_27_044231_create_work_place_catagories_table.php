@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_place_catagories', function (Blueprint $table) {
-            $table->id(); 
-            $table->string('name', 50)->required();
+            $table->id();
+            $table->string('name', 150)->required();
             $table->tinyInteger('active')->default(1)->required();
             $table->timestamps();
         });

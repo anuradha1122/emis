@@ -12,30 +12,33 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('location_infos', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to users (UUID)
-            $table->foreignId('userId')
-                  ->constrained('users')
+            // FK to users (UUID)
+            $table->uuid('userId');
+            $table->foreign('userId')
+                  ->references('id')
+                  ->on('users')
                   ->restrictOnDelete();
 
-            // Foreign key to offices (education division, UUID)
-            $table->foreignId('educationDivisionId')
-                  ->nullable()
-                  ->constrained('offices')
+            // FK to offices (UUID)
+            $table->uuid('educationDivisionId')->nullable();
+            $table->foreign('educationDivisionId')
+                  ->references('id')
+                  ->on('offices')
                   ->restrictOnDelete();
 
-            // Foreign key to GN divisions (UUID)
-            $table->foreignId('gnDivisionId')
-                  ->nullable()
-                  ->constrained('gn_divisions')
+            // FK to gn_divisions (UUID)
+            $table->uuid('gnDivisionId')->nullable();
+            $table->foreign('gnDivisionId')
+                  ->references('id')
+                  ->on('gn_divisions')
                   ->restrictOnDelete();
 
             $table->tinyInteger('active')->default(1);
             $table->timestamps();
         });
-
-
     }
 
     /**

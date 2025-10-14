@@ -12,10 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('gn_divisions', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            /// FK to districts
-            $table->foreignId('dsId')->constrained('ds_divisions')->restrictOnDelete();
+            // FK to ds_divisions (UUID)
+            $table->uuid('dsId');
+            $table->foreign('dsId')
+                  ->references('id')
+                  ->on('ds_divisions')
+                  ->restrictOnDelete();
 
             $table->string('name', 50);
             $table->string('gnCode', 60);
@@ -23,7 +28,6 @@ return new class extends Migration
             $table->tinyInteger('active')->default(1);
             $table->timestamps();
         });
-
     }
 
     /**

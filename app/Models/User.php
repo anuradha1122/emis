@@ -12,6 +12,7 @@ use App\Models\UserInService;
 use App\Models\Position;
 use App\Models\PersonalInfo;
 use App\Models\School;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -29,6 +30,25 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed'
     ];
+
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            // UUID primary key
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+
+            //Auto-increment incrementId
+            if (empty($model->incrementId)) {
+                $max = static::max('incrementId') ?? 0;
+                $model->incrementId = $max + 1;
+            }
+        });
+    }
 
     // === Relationships ===
 
@@ -177,33 +197,6 @@ public function currentTeacherService(): HasOne
             default:
                 return [];
         }
-    }
-
-    // === Permission Management ===
-    // Relation to Role
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'roleId'); // assuming 'role_id' is in users table
-    }
-
-    // Permissions via role
-    public function permissions()
-    {
-        return $this->role
-        ? $this->role->permissions()->where('active', 1)
-        : collect();
-    }
-
-    // Check if user has a specific permission
-    public function hasPermission(string $permissionName): bool
-    {
-        return $this->permissions()->where('name', $permissionName)->exists();
-    }
-
-    // Optional: Check if user has permission by ID
-    public function hasPermissionById(int $permissionId): bool
-    {
-        return $this->permissions()->where('id', $permissionId)->exists();
     }
 
     // === User Search ===

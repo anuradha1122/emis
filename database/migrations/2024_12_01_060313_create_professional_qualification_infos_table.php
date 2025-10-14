@@ -12,21 +12,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('professional_qualification_infos', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to users
-            $table->foreignId('userId')
-                  ->constrained('users')
+            // Foreign UUID to users
+            $table->uuid('userId');
+            $table->foreign('userId')
+                  ->references('id')
+                  ->on('users')
                   ->restrictOnDelete();
 
-            // Foreign key to professional_qualifications (nullable)
+            // Foreign key to professional_qualifications (auto-increment)
             $table->foreignId('profQualiId')
                   ->nullable()
                   ->constrained('professional_qualifications')
                   ->nullOnDelete();
 
+            // Effective date
             $table->date('effectiveDate');
 
+            // Optional description
             $table->string('description', 100)->nullable();
 
             // Active flag

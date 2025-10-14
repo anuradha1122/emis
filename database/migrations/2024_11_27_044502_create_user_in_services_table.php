@@ -12,14 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_in_services', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
+            $table->integer('incrementId')->unsigned()->unique();
 
-            // Foreign key to users (if users.id is UUID)
-            $table->foreignId('userId')
-                  ->constrained('users')
+            $table->integer('userIncrementId')->unsigned();
+            // FK to users (UUID)
+            $table->uuid('userId');
+            $table->foreign('userId')
+                  ->references('id')
+                  ->on('users')
                   ->restrictOnDelete();
 
-            // Foreign key to services (if services.id is UUID)
+            // FK to services (auto-increment integer)
             $table->foreignId('serviceId')
                   ->constrained('services')
                   ->restrictOnDelete();

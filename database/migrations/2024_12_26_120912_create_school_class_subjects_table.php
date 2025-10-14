@@ -12,13 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('school_class_subjects', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign keys
-            $table->foreignId('schoolClassId')
-                  ->constrained('school_class_lists')
+            // Foreign UUID
+            $table->uuid('schoolClassId');
+            $table->foreign('schoolClassId')
+                  ->references('id')
+                  ->on('school_class_lists')
                   ->restrictOnDelete();
 
+            // Foreign keys to lookup tables (auto-increment integers)
             $table->foreignId('subjectId')
                   ->constrained('subjects')
                   ->restrictOnDelete();
@@ -32,7 +36,6 @@ return new class extends Migration
 
             $table->timestamps();
         });
-
     }
 
     /**

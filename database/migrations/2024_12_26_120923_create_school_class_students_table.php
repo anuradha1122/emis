@@ -12,15 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('school_class_students', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign keys
-            $table->foreignId('schoolClassId')
-                  ->constrained('school_class_lists')
+            // Foreign UUIDs
+            $table->uuid('schoolClassId');
+            $table->foreign('schoolClassId')
+                  ->references('id')
+                  ->on('school_class_lists')
                   ->restrictOnDelete();
 
-            $table->foreignId('studentId')
-                  ->constrained('students')
+            $table->uuid('studentId');
+            $table->foreign('studentId')
+                  ->references('id')
+                  ->on('students')
                   ->restrictOnDelete();
 
             // Current and active flags
@@ -29,7 +34,6 @@ return new class extends Migration
 
             $table->timestamps();
         });
-
     }
 
     /**

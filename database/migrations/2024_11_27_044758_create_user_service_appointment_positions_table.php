@@ -12,14 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_service_appointment_positions', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
+            $table->integer('incrementId')->unsigned()->unique();
 
-            // Foreign key to user_service_appointments
-            $table->foreignId('userServiceAppId')
-                  ->constrained('user_service_appointments')
+            $table->integer('userServiceAppIncId')->unsigned()->unique();
+            // FK to user_service_appointments (UUID)
+            $table->uuid('userServiceAppId');
+            $table->foreign('userServiceAppId')
+                  ->references('id')
+                  ->on('user_service_appointments')
                   ->restrictOnDelete();
 
-            // Foreign key to positions
+            // FK to positions (auto-increment integer)
             $table->foreignId('positionId')
                   ->constrained('positions')
                   ->restrictOnDelete();
@@ -32,7 +37,6 @@ return new class extends Migration
 
             $table->timestamps();
         });
-
     }
 
     /**

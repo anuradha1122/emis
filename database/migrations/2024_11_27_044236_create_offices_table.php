@@ -12,41 +12,46 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('offices', function (Blueprint $table) {
-            $table->id();
-
-            // FK to work_places
-            $table->foreignId('workPlaceId')
-                  ->constrained('work_places')
-                  ->restrictOnDelete();
+            // UUID primary key
+            $table->uuid('id')->primary();
+            $table->integer('incrementId')->unsigned()->unique();
+            $table->integer('workPlaceIncrementId')->unsigned()->unique();
+            // FK to work_places (UUID)
+            $table->uuid('workPlaceId');
+            $table->foreign('workPlaceId')
+                ->references('id')
+                ->on('work_places')
+                ->restrictOnDelete();
 
             $table->string('officeNo', 6);
 
-            // self-referencing FK (nullable)
-            $table->foreignId('higherOfficeId')
-                  ->nullable()
-                  ->constrained('offices')
-                  ->nullOnDelete();
+            // Self-referencing FK (UUID, nullable)
+            $table->uuid('higherOfficeId')->nullable();
+            $table->foreign('higherOfficeId')
+                ->references('id')
+                ->on('offices')
+                ->nullOnDelete();
 
-            // FK to districts (nullable)
+            // FK to districts (auto-increment, still fine)
             $table->foreignId('districtId')
-                  ->nullable()
-                  ->constrained('districts')
-                  ->nullOnDelete();
+                ->nullable()
+                ->constrained('districts')
+                ->nullOnDelete();
 
-            // FK to provinces
+            // FK to provinces (auto-increment)
             $table->foreignId('provinceId')
                 ->constrained('provinces')
-                ->cascadeOnDelete(); // or restrictOnDelete()
+                ->cascadeOnDelete();
 
-
-            // FK to office_types
+            // FK to office_types (auto-increment)
             $table->foreignId('officeTypeId')
-                  ->constrained('office_types')
-                  ->restrictOnDelete();
+                ->constrained('office_types')
+                ->restrictOnDelete();
 
             $table->tinyInteger('active')->default(1);
             $table->timestamps();
         });
+
 
     }
 

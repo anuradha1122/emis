@@ -12,28 +12,33 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('school_class_lists', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign keys
-            $table->foreignId('schoolId')
-                  ->constrained('schools')
-                  ->restrictOnDelete();
+            // Foreign UUIDs
+            $table->uuid('schoolId');
+            $table->foreign('schoolId')
+                ->references('id')
+                ->on('schools')
+                ->restrictOnDelete();
 
+            // Auto-increment foreign keys
             $table->foreignId('classId')
-                  ->constrained('class_lists')
-                  ->restrictOnDelete();
+                ->constrained('class_lists')
+                ->restrictOnDelete();
 
-            // Nullable foreign key to user_service_appointments (teacher)
-            $table->foreignId('teacherId')
-                  ->nullable()
-                  ->constrained('user_service_appointments')
-                  ->nullOnDelete();
+            // Nullable foreign UUID for teacher
+            $table->uuid('teacherId')->nullable();
+            $table->foreign('teacherId')
+                ->references('id')
+                ->on('user_service_appointments')
+                ->nullOnDelete();
 
-            // Optional medium
+            // Auto-increment foreign key (optional medium)
             $table->foreignId('mediumId')
-                  ->nullable()
-                  ->constrained('class_media')
-                  ->nullOnDelete();
+                ->nullable()
+                ->constrained('class_media')
+                ->nullOnDelete();
 
             $table->integer('studentCount')->unsigned()->nullable();
             $table->tinyInteger('year')->unsigned()->nullable();

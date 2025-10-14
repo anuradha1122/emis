@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-700 dark:text-gray-500 leading-tight">
-            {{ __('Teacher Dashboard') }}
+            {{ __('My Profile Edit') }}
         </h2>
     </x-slot>
 
@@ -13,31 +13,21 @@
                     <!-- Breadcrumb -->
                     <x-breadcrumb :items="[
                         'Home' => route('dashboard'),
-                        'Teacher Dashboard' => route('teacher.dashboard'),
-                        'Teacher Profile' => route('teacher.profile', ['id' => $encryptedId]),
+                        'My Profile' => route('profile.myprofile'),
                         'Edit' => null
                     ]" />
                 </div>
 
                 <div class="mb-6">
                     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100"></h2>
-                    <p class="text-gray-600 dark:text-gray-300">Manage View SLTS(Sri Lanka Teacher Service)
+                    <p class="text-gray-600 dark:text-gray-300">Manage View My Profile
                     </p>
                 </div>
-                @if (session('success'))
-                    <div class="mb-4 p-4 text-green-800 bg-green-100 dark:bg-green-700 dark:text-green-100 rounded-lg">
-                        {{ session('success') }}
-                    </div>
+                @if(session('success'))
+                    <div class="text-green-600">{{ session('success') }}</div>
                 @endif
-                @if (session('error'))
-                    <div class="mb-4 p-4 text-red-800 bg-red-100 dark:bg-red-700 dark:text-red-100 rounded-lg">
-                        {{ session('error') }}
-                    </div>
-                @endif
-                @if (session('warning'))
-                    <div class="mb-4 p-4 text-orange-800 bg-orange-100 dark:bg-orange-700 dark:text-orange-100 rounded-lg">
-                        {{ session('warning') }}
-                    </div>
+                @if(session('info'))
+                    <div class="text-blue-600">{{ session('info') }}</div>
                 @endif
                 <div class="mt-8 border-t border-gray-200 dark:border-gray-700">
                     @if($section === 'personal')
@@ -132,20 +122,8 @@
                             value="{{ old('mobile2', optional($teacher->contactInfo)->mobile2) }}" />
 
                         </div>
-
-                        <div class="flex items-center justify-start gap-2 mx-4">
-                            <button type="submit"
-                                class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                       focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                       text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                Submit
-                            </button>
-
-                            <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Back
-                            </a>
+                        <div class="mt-10">
+                            <x-form-button-primary size="" text="Update" modelBinding=""/>
                         </div>
                     </form>
                     @endif
@@ -198,19 +176,8 @@
                                     value="{{ old('birthDay', optional($teacher->personalInfo)->birthDay) }}" />
 
                             </div>
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
+                            <div class="mt-10">
+                                <x-form-button-primary size="" text="Update" modelBinding=""/>
                             </div>
                         </form>
                     @endif
@@ -228,19 +195,8 @@
                                 @livewire('form-location-gn-division-list')
                             </div>
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
+                            <div class="mt-10">
+                                <x-form-button-primary size="" text="Update" modelBinding=""/>
                             </div>
                         </form>
                     @endif
@@ -271,20 +227,7 @@
                                     value="{{ old('rankedDate') }}" />
                             </div>
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
-                            </div>
+                            <x-form-button-primary size="" text="Save Rank" modelBinding="" />
                         </form>
 
                         {{-- Display Existing Ranks --}}
@@ -362,19 +305,8 @@
                                 <span class="sm:col-span-2">@livewire('all-school-list')</span>
                             </div>
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
+                            <div class="mt-10">
+                                <x-form-button-primary modelBinding="" size="" text="Add Family Member" />
                             </div>
                         </form>
 
@@ -438,20 +370,7 @@
                                     value="{{ old('education.new.effectiveDate') }}" />
                             </div>
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
-                            </div>
+                            <x-form-button-primary size="" text="Add Qualification" modelBinding="" />
                         </form>
 
                         {{-- Display existing qualifications --}}
@@ -509,20 +428,7 @@
                                     value="{{ old('professional.new.effectiveDate') }}" />
                             </div>
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
-                            </div>
+                            <x-form-button-primary size="" text="Add Qualification" modelBinding="" />
                         </form>
 
                         {{-- Display existing qualifications --}}
@@ -595,19 +501,8 @@
                                     :selected="old('category', optional($teacher->currentTeacherService->teacherService)->appointmentCategoryId)" />
 
                             </div>
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
+                            <div class="mt-10">
+                                <x-form-button-primary size="" text="Update" modelBinding=""/>
                             </div>
                         </form>
                     @endif
@@ -644,19 +539,8 @@
                                     value="{{ old('service.new.releasedDate') }}" />
                             </div>
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
+                            <div class="mt-6">
+                                <x-form-button-primary size="" modelBinding="" text="Save Service Info" />
                             </div>
                         </form>
 
@@ -749,20 +633,7 @@
                             </div>
 
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
-                            </div>
+                            <x-form-button-primary size="" text="Save Service Info" modelBinding="" />
                         </form>
 
                         @if(isset($appointments) && $appointments->count())
@@ -856,19 +727,8 @@
                                     value="{{ old('position.new.positionedDate') }}" />
                             </div>
 
-                            <div class="flex items-center justify-start gap-2 mx-4">
-                                <button type="submit"
-                                    class="mt-4 p-2 transition duration-200 bg-blue-500 hover:bg-blue-600 focus:bg-blue-700
-                                           focus:shadow-sm focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50
-                                           text-white rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                    Submit
-                                </button>
-
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
-                                    focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
-                                    text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
-                                        Back
-                                </a>
+                            <div class="mt-4">
+                                <x-form-button-primary size="" modelBinding="" text="Save Position Info" />
                             </div>
                         </form>
 
@@ -927,13 +787,29 @@
                     @endif
 
                     @if($section === 'login-info')
-                        <form action="{{ route('teacher.profileupdate', ['id' => $encryptedId]) }}" method="POST">
+                        <form action="{{ route('profile.myprofilestore') }}" method="POST">
                             @csrf
-                            <input type="hidden" name="id" value="{{ $decryptedId }}">
                             <input type="hidden" name="section" value="login-info">
 
-                            <div class="grid sm:grid-cols-3 gap-4 mt-4">
-                                <p class="text-gray-600 dark:text-gray-300">Current Username: <span class="font-semibold">{{ $teacher->nic }}. Click the reset button to reset password</span></p>
+                            <div class="grid sm:grid-cols-3 gap-4 my-4 pb-5">
+                                <x-form-text-input-section
+                                    size="sm:col-span-2"
+                                    name="password"
+                                    id="password"
+                                    label="New Password"
+                                    value=""
+                                    type="password"
+                                />
+
+                                <x-form-text-input-section
+                                    size="sm:col-span-2"
+                                    name="password_confirmation"
+                                    id="password_confirmation"
+                                    label="Confirm Password"
+                                    value=""
+                                    type="password"
+                                />
+
                             </div>
 
                             <div class="flex items-center justify-start gap-2 mx-4">
@@ -944,7 +820,7 @@
                                     Submit
                                 </button>
 
-                                <a href="{{ route('teacher.profile', ['id' => $encryptedId]) }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
+                                <a href="{{ route('profile.myprofile') }}" class="mt-4 p-2 transition duration-200 bg-white hover:bg-white focus:bg-white
                                     focus:shadow-sm focus:ring-4 focus:ring-white focus:ring-opacity-50
                                     text-black rounded-lg text-sm shadow-sm hover:shadow-md font-semibold">
                                         Back

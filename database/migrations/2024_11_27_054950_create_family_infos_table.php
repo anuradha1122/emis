@@ -12,14 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('family_infos', function (Blueprint $table) {
-            $table->id();
+            // Primary key as UUID
+            $table->uuid('id')->primary();
 
-            // Foreign key to users
-            $table->foreignId('userId')
-                  ->constrained('users')
+            // Foreign UUID to users
+            $table->uuid('userId');
+            $table->foreign('userId')
+                  ->references('id')
+                  ->on('users')
                   ->restrictOnDelete();
 
-            // Foreign key to family_member_types (nullable)
+            // Foreign key to family_member_types (auto increment)
             $table->foreignId('memberTypeId')
                   ->nullable()
                   ->constrained('family_member_types')
@@ -28,10 +31,11 @@ return new class extends Migration
             $table->string('nic', 12)->nullable();
             $table->string('name', 200);
 
-            // Optional school reference (assuming schools.id is UUID)
-            $table->foreignId('schoolId')
-                  ->nullable()
-                  ->constrained('schools')
+            // Foreign UUID to schools
+            $table->uuid('schoolId')->nullable();
+            $table->foreign('schoolId')
+                  ->references('id')
+                  ->on('schools')
                   ->nullOnDelete();
 
             $table->string('profession', 200)->nullable();
